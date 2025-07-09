@@ -35,13 +35,14 @@ meson install
 
 ## Discussion
 
-Matrix: [`#wayback:catircservices.org`](https://matrix.to/#/#wayback:catircservices.org)
-IRC: irc.libera.chat #wayback
+- Matrix: [`#wayback:catircservices.org`](https://matrix.to/#/#wayback:catircservices.org)
+- IRC: irc.libera.chat `#wayback`
 
 ## Code of Conduct
 
 As a project hosted on freedesktop.org, Wayback follows its [Code of Conduct][fdo-coc],
-based on the Contributor Covenant. Please conduct yourself in a respectful
-and civilized manner when using the above venues.
+based on the Contributor Covenant.
+
+Please conduct yourself in a respectful and civilized manner when using the above venues.
 
 [fdo-coc]: https://www.freedesktop.org/wiki/CodeOfConduct
