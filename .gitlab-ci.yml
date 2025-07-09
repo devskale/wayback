@@ -21,8 +21,6 @@ alpine:
           meson compile -C builddir/ -v
     only:
         - branches
-    tags:
-        - priority:low
 
 arch:
     image: ghcr.io/archlinux/archlinux:base-devel
@@ -44,8 +42,6 @@ arch:
           meson compile -C builddir/ -v
     only:
         - branches
-    tags:
-        - priority:low
 
 fedora:
     image: quay.io/fedora/fedora:rawhide
@@ -71,5 +67,3 @@ fedora:
           meson compile -C builddir/ -v
     only:
         - branches
-    tags:
-        - priority:low
