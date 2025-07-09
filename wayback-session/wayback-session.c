@@ -38,13 +38,13 @@ char *get_xinitrc_path() {
 	exit(EXIT_FAILURE);
 }
 
-void handle_exit(int sig) {
+void handle_child_exit(int sig) {
 	pid_t pid = waitpid(-1, NULL, WNOHANG);
 	if (pid == session_pid|| pid == xwayback_pid) {
 		if (pid == session_pid && xwayback_pid > 0)
-			kill(xwayback_pid, SIGKILL);
+			kill(xwayback_pid, SIGTERM);
 		if (pid == xwayback_pid && session_pid > 0)
-			kill(session_pid, SIGKILL);
+			kill(session_pid, SIGTERM);
 		exit(EXIT_SUCCESS);
 	}
 }
@@ -52,7 +52,7 @@ void handle_exit(int sig) {
 int main(int argc, char* argv[]) {
 	char **session_cmd;
 	char *xinitrc_path = NULL;
-	signal(SIGCHLD, handle_exit);
+	signal(SIGCHLD, handle_child_exit);
 
 	if (argc == 1) {
 		xinitrc_path = get_xinitrc_path();

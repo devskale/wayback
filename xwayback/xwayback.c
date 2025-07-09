@@ -176,15 +176,20 @@ static const struct wl_registry_listener registry_listener = {
 	.global_remove = NULL, // TODO: handle_global_remove
 };
 
-void handle_exit(int sig) {
+void handle_child_exit(int sig) {
 	pid_t pid = waitpid(-1, NULL, WNOHANG);
 	if (pid == comp_pid|| pid == xway_pid) {
 		if (pid == comp_pid && xway_pid > 0)
-			kill(xway_pid, SIGKILL);
+			kill(xway_pid, SIGTERM);
 		if (pid == xway_pid && comp_pid > 0)
-			kill(comp_pid, SIGKILL);
+			kill(comp_pid, SIGTERM);
 		exit(EXIT_SUCCESS);
 	}
+}
+
+void handle_exit(int sig) {
+	kill(xway_pid, SIGTERM);
+	kill(comp_pid, SIGTERM);
 }
 
 static const char *basename_c(const char *path)
@@ -207,7 +212,8 @@ int main(int argc, char* argv[]) {
 	char *displayfd = NULL;
 	int opt;
 
-	signal(SIGCHLD, handle_exit);
+	signal(SIGCHLD, handle_child_exit);
+	signal(SIGTERM, handle_exit);
 
 	// TODO: Implement all options from Xserver(1) and Xorg(1)
 	static struct option long_options[] = {
