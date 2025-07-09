@@ -4,7 +4,11 @@ project('wayback', 'c',
   meson_version: '>= 0.55',
   default_options: [
     'c_std=gnu11',
+    'warning_level=3',
   ])
+
+cc = meson.get_compiler('c')
+add_project_arguments(cc.get_supported_arguments(['-Wno-unused-parameter']), language: 'c')
 
 add_project_arguments('-DWLR_USE_UNSTABLE', language: 'c')
 
