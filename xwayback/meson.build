@@ -1,7 +1,7 @@
 executable(
 	'Xwayback',
-	['xwayback.c', '../common/wayback_log.c'],
-	dependencies: [wayland_client, client_protos],
+	['xwayback.c'],
+	dependencies: [wayland_client, client_protos, shared],
 	include_directories: common,
 	install: true,
 )
