@@ -6,11 +6,13 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include "wayback_log.h"
 
 static enum wayback_log_level logging_max_verbosity = LOG_INFO;
 static char *logging_context = "wayback";
+static bool logging_use_color = true;
 
 static const char *log_colors[] = {
     [LOG_ERROR] = "\x1b[1;31m",
@@ -27,20 +29,19 @@ static const char *log_prefix[] = {
 };
 
 static void default_log_func(enum wayback_log_level verbosity, const char *fmt, va_list args) {
-
     if (verbosity > logging_max_verbosity)
         return;
 
     unsigned verbosity_lvl = (verbosity < LOG_LAST) ? verbosity : LOG_LAST-1;
 
-    if (isatty(STDERR_FILENO))
+    if (logging_use_color)
         fprintf(stderr, "%s", log_colors[verbosity_lvl]);
 
     fprintf(stderr, "%s (%s): ", log_prefix[verbosity_lvl], logging_context);
 
     vfprintf(stderr, fmt, args);
 
-    if (isatty(STDERR_FILENO))
+    if (logging_use_color)
         fprintf(stderr, "\x1b[0m");
 
     fprintf(stderr, "\n");
@@ -56,6 +57,10 @@ void wayback_log_init(char *ctx, enum wayback_log_level max_verbosity, wayback_l
 
     if (log_function)
         logging_func = log_function;
+
+    char *no_color = getenv("NO_COLOR");
+    if ((no_color != NULL && no_color[0] != '\0') || !isatty(STDERR_FILENO))
+        logging_use_color = false;
 }
 
 void wayback_vlog(enum wayback_log_level verbosity, const char* format, va_list args) {

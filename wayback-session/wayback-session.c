@@ -51,6 +51,8 @@ void handle_child_exit(int sig) {
 }
 
 int main(int argc, char* argv[]) {
+	wayback_log_init("wayback-session", LOG_INFO, NULL);
+
 	char **session_cmd;
 	char *xinitrc_path = NULL;
 	signal(SIGCHLD, handle_child_exit);
@@ -60,8 +62,6 @@ int main(int argc, char* argv[]) {
 	} else {
 		session_cmd = &argv[optind];
 	}
-
-	wayback_log_init("wayback-session", LOG_INFO, NULL);
 
 	int fd[2];
 	if (pipe(fd) == -1) {
