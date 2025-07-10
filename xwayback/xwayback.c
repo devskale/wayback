@@ -178,7 +178,7 @@ static const struct wl_registry_listener registry_listener = {
 
 void handle_child_exit(int sig) {
 	pid_t pid = waitpid(-1, NULL, WNOHANG);
-	if (pid == comp_pid|| pid == xway_pid) {
+	if (pid == comp_pid || pid == xway_pid) {
 		if (pid == comp_pid && xway_pid > 0)
 			kill(xway_pid, SIGTERM);
 		if (pid == xway_pid && comp_pid > 0)
@@ -190,6 +190,13 @@ void handle_child_exit(int sig) {
 void handle_exit(int sig) {
 	kill(xway_pid, SIGTERM);
 	kill(comp_pid, SIGTERM);
+}
+
+void handle_segv(int sig) {
+	fprintf(stderr, "FATAL: Received SIGSEGV (Segmentation fault)!\n");
+	fprintf(stderr, "This is a bug!\nPlease visit https://gitlab.freedesktop.org/wayback/wayback/-/issues/ to check\nif this bug has already been reported.  If not, fill a new bug report with steps\nto reproduce this error.  If you need assistance, join #wayback on Libera.Chat\nor #wayback:catircservices.org on Matrix.\n");
+
+	handle_exit(sig);
 }
 
 static const char *basename_c(const char *path)
@@ -213,6 +220,7 @@ int main(int argc, char* argv[]) {
 	int opt;
 
 	signal(SIGCHLD, handle_child_exit);
+	signal(SIGSEGV, handle_segv);
 	signal(SIGTERM, handle_exit);
 
 	// TODO: Implement all options from Xserver(1) and Xorg(1)
@@ -236,11 +244,29 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+	if (unsetenv("WAYLAND_DISPLAY") == -1)
+		// not the end of the world if it couldn't be unset
+		printf("Xwayback: could not unset WAYLAND_DISPLAY\n");
+
 	// displayfd takes priority
 	// TODO: Check if this is also the case in Xserver(7)
 	if (displayfd != NULL) {
 		printf("Xwayback: using displayfd\n");
 		x_display = NULL;
+	}
+
+	// check if the compositor/Xwayland binaries are accessible before doing anything else
+	char *wayback_compositor_path = getenv("WAYBACK_COMPOSITOR_PATH");
+	if (wayback_compositor_path == NULL)
+		wayback_compositor_path = strdup(WAYBACK_COMPOSITOR_EXEC_PATH);
+
+	if (access(wayback_compositor_path, F_OK | X_OK) == -1) {
+		fprintf(stderr, "ERROR: wayback-compositor %s: inaccessible or not found/executable\n", wayback_compositor_path);
+		exit(EXIT_FAILURE);
+	}
+	if (access(XWAYLAND_EXEC_PATH, F_OK | X_OK) == -1) {
+		fprintf(stderr, "ERROR: Xwayland %s: inaccessible or not found/executable\n", XWAYLAND_EXEC_PATH);
+		exit(EXIT_FAILURE);
 	}
 
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, socket_xwayback) == -1) {
@@ -255,16 +281,12 @@ int main(int argc, char* argv[]) {
 
 	comp_pid = fork();
 	if (comp_pid == 0) {
-		char *wayback_compositor_path = getenv("WAYBACK_COMPOSITOR_PATH");
-		if (wayback_compositor_path == NULL)
-			wayback_compositor_path = strdup(WAYBACK_COMPOSITOR_EXEC_PATH);
-
 		char fd_xwayback[64];
 		char fd_xwayland[64];
 		snprintf(fd_xwayback, sizeof(fd_xwayback), "%d", socket_xwayback[0]);
 		snprintf(fd_xwayland, sizeof(fd_xwayland), "%d", socket_xwayland[0]);
 
-		printf("Passed descriptor xback: %s; xway: %s\n", fd_xwayback, fd_xwayland);
+		printf("Xwayback: passed descriptor xwayback: %s; xwayland: %s\n", fd_xwayback, fd_xwayland);
 		close(socket_xwayback[1]);
 		close(socket_xwayland[1]);
 		execlp(wayback_compositor_path, wayback_compositor_path, fd_xwayback, fd_xwayland, (void *)NULL);
@@ -295,6 +317,10 @@ int main(int argc, char* argv[]) {
 	wl_registry_add_listener(registry, &registry_listener, xwayback);
 	wl_display_roundtrip(xwayback->display);
 	wl_display_roundtrip(xwayback->display); // xdg-output requires two roundtrips
+	if (xwayback->first_output == NULL) {
+		fprintf(stderr, "ERROR: unable to get first output\n");
+		exit(EXIT_FAILURE);
+	}
 
 	xway_pid = fork();
 	if (xway_pid == 0) {
@@ -306,9 +332,9 @@ int main(int argc, char* argv[]) {
 		snprintf(geometry, sizeof(geometry), "%dx%d", xwayback->first_output->width, xwayback->first_output->height);
 
 		if (x_display)
-			execl(XWAYLAND_EXEC_PATH, basename_c(XWAYLAND_EXEC_PATH), x_display, "-fullscreen", "-retro", "-geometry", geometry, (void*)NULL);
+			execl(XWAYLAND_EXEC_PATH, basename_c(XWAYLAND_EXEC_PATH), x_display, "-fullscreen", "-retro", "-terminate", "-geometry", geometry, (void*)NULL);
 		else {
-			execl(XWAYLAND_EXEC_PATH, basename_c(XWAYLAND_EXEC_PATH), "-displayfd", displayfd, "-fullscreen", "-retro", "-geometry", geometry, (void*)NULL);
+			execl(XWAYLAND_EXEC_PATH, basename_c(XWAYLAND_EXEC_PATH), "-displayfd", displayfd, "-fullscreen", "-retro", "-terminate", "-geometry", geometry, (void*)NULL);
 		}
 		fprintf(stderr, "ERROR: failed to launch Xwayland\n");
 		exit(EXIT_FAILURE);
