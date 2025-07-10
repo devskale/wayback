@@ -244,6 +244,10 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+	if (unsetenv("WAYLAND_DISPLAY") == -1)
+		// not the end of the world if it couldn't be unset
+		printf("Xwayback: could not unset WAYLAND_DISPLAY\n");
+
 	// displayfd takes priority
 	// TODO: Check if this is also the case in Xserver(7)
 	if (displayfd != NULL) {
