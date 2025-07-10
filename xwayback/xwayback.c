@@ -282,7 +282,7 @@ int main(int argc, char* argv[]) {
 		snprintf(fd_xwayback, sizeof(fd_xwayback), "%d", socket_xwayback[0]);
 		snprintf(fd_xwayland, sizeof(fd_xwayland), "%d", socket_xwayland[0]);
 
-		printf("Passed descriptor xback: %s; xway: %s\n", fd_xwayback, fd_xwayland);
+		printf("Xwayback: passed descriptor xwayback: %s; xwayland: %s\n", fd_xwayback, fd_xwayland);
 		close(socket_xwayback[1]);
 		close(socket_xwayland[1]);
 		execlp(wayback_compositor_path, wayback_compositor_path, fd_xwayback, fd_xwayland, (void *)NULL);
