@@ -328,9 +328,9 @@ int main(int argc, char* argv[]) {
 		snprintf(geometry, sizeof(geometry), "%dx%d", xwayback->first_output->width, xwayback->first_output->height);
 
 		if (x_display)
-			execl(XWAYLAND_EXEC_PATH, basename_c(XWAYLAND_EXEC_PATH), x_display, "-fullscreen", "-retro", "-geometry", geometry, (void*)NULL);
+			execl(XWAYLAND_EXEC_PATH, basename_c(XWAYLAND_EXEC_PATH), x_display, "-fullscreen", "-retro", "-terminate", "-geometry", geometry, (void*)NULL);
 		else {
-			execl(XWAYLAND_EXEC_PATH, basename_c(XWAYLAND_EXEC_PATH), "-displayfd", displayfd, "-fullscreen", "-retro", "-geometry", geometry, (void*)NULL);
+			execl(XWAYLAND_EXEC_PATH, basename_c(XWAYLAND_EXEC_PATH), "-displayfd", displayfd, "-fullscreen", "-retro", "-terminate", "-geometry", geometry, (void*)NULL);
 		}
 		fprintf(stderr, "ERROR: failed to launch Xwayland\n");
 		exit(EXIT_FAILURE);
