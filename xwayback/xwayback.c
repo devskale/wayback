@@ -313,6 +313,10 @@ int main(int argc, char* argv[]) {
 	wl_registry_add_listener(registry, &registry_listener, xwayback);
 	wl_display_roundtrip(xwayback->display);
 	wl_display_roundtrip(xwayback->display); // xdg-output requires two roundtrips
+	if (xwayback->first_output == NULL) {
+		fprintf(stderr, "ERROR: unable to get first output\n");
+		exit(EXIT_FAILURE);
+	}
 
 	xway_pid = fork();
 	if (xway_pid == 0) {
