@@ -251,6 +251,20 @@ int main(int argc, char* argv[]) {
 		x_display = NULL;
 	}
 
+	// check if the compositor/Xwayland binaries are accessible before doing anything else
+	char *wayback_compositor_path = getenv("WAYBACK_COMPOSITOR_PATH");
+	if (wayback_compositor_path == NULL)
+		wayback_compositor_path = strdup(WAYBACK_COMPOSITOR_EXEC_PATH);
+
+	if (access(wayback_compositor_path, F_OK | X_OK) == -1) {
+		fprintf(stderr, "ERROR: wayback-compositor %s: inaccessible or not found/executable\n", wayback_compositor_path);
+		exit(EXIT_FAILURE);
+	}
+	if (access(XWAYLAND_EXEC_PATH, F_OK | X_OK) == -1) {
+		fprintf(stderr, "ERROR: Xwayland %s: inaccessible or not found/executable\n", XWAYLAND_EXEC_PATH);
+		exit(EXIT_FAILURE);
+	}
+
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, socket_xwayback) == -1) {
 		fprintf(stderr, "ERROR: unable to create xwayback socket\n");
 		exit(EXIT_FAILURE);
@@ -263,10 +277,6 @@ int main(int argc, char* argv[]) {
 
 	comp_pid = fork();
 	if (comp_pid == 0) {
-		char *wayback_compositor_path = getenv("WAYBACK_COMPOSITOR_PATH");
-		if (wayback_compositor_path == NULL)
-			wayback_compositor_path = strdup(WAYBACK_COMPOSITOR_EXEC_PATH);
-
 		char fd_xwayback[64];
 		char fd_xwayland[64];
 		snprintf(fd_xwayback, sizeof(fd_xwayback), "%d", socket_xwayback[0]);
