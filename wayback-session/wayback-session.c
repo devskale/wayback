@@ -77,14 +77,14 @@ int main(int argc, char *argv[])
 	if (xwayback_pid == 0) {
 		close(fd[0]);
 		wayback_log(LOG_INFO, "Launching with fd %d", fd[1]);
-		char fd_str[BUFSIZ];
-		snprintf(fd_str, BUFSIZ, "%d", fd[1]);
+		char *fd_str;
+		asprintf(&fd_str, "%d", fd[1]);
 		execlp("Xwayback", "Xwayback", "--displayfd", fd_str, (void *)NULL);
 		wayback_log(LOG_ERROR, "Failed to launch Xwayback");
 		exit(EXIT_FAILURE);
 	}
 
-	char buffer[BUFSIZ - 1];
+	char buffer[4095];
 	close(fd[1]);
 	ssize_t n = read(fd[0], buffer, sizeof(buffer) - 1);
 	if (n > 0) {
@@ -92,8 +92,8 @@ int main(int argc, char *argv[])
 		wayback_log(LOG_INFO, "Received display %s", buffer);
 	}
 
-	char x_display[BUFSIZ];
-	snprintf(x_display, BUFSIZ, ":%s", buffer);
+	char *x_display;
+	asprintf(&x_display, ":%s", buffer);
 
 	session_pid = fork();
 	if (session_pid == 0) {

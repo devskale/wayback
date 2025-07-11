@@ -230,7 +230,7 @@ void handle_exit(int sig)
 
 void handle_segv(int sig)
 {
-	char errormsg[BUFSIZ] =
+	const char *errormsg =
 		"[ERROR] (Xwayback): Received SIGSEGV (Segmentation fault)!\n"
 		"This is a bug!\nPlease visit https://gitlab.freedesktop.org/wayback/wayback/-/issues/ to "
 		"check\nif this bug has already been reported.  If not, fill a new bug report with "
@@ -257,7 +257,6 @@ int main(int argc, char *argv[])
 	struct xwayback *xwayback = malloc(sizeof(struct xwayback));
 	int socket_xwayback[2];
 	int socket_xwayland[2];
-	char buffer[BUFSIZ];
 	const char *x_display = ":0";
 	char *displayfd = NULL;
 	int opt;
@@ -355,7 +354,6 @@ int main(int argc, char *argv[])
 	snprintf(way_display, sizeof(way_display), "%d", socket_xwayback[1]);
 	setenv("WAYLAND_SOCKET", way_display, true);
 
-	xwayback->wayland_socket = strdup(buffer);
 	if (x_display)
 		xwayback->X_display = strdup(x_display);
 
