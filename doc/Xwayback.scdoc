@@ -25,6 +25,9 @@ Xwayback - experimental X11 compatibility layer
     *XWAYLAND_PATH*
         Path to Xwayland
 
+    *WAYBACK_OUTPUT*
+        The output to use, either in the format "<Make> <model>" or the display ID (i.e. "eDP-1")
+
 # LICENSE
 
 MIT
