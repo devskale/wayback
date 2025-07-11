@@ -257,15 +257,18 @@ int main(int argc, char* argv[]) {
 
 	// check if the compositor/Xwayland binaries are accessible before doing anything else
 	char *wayback_compositor_path = getenv("WAYBACK_COMPOSITOR_PATH");
+	char *xwayland_path = getenv("XWAYLAND_PATH");
 	if (wayback_compositor_path == NULL)
 		wayback_compositor_path = strdup(WAYBACK_COMPOSITOR_EXEC_PATH);
+	if (xwayland_path == NULL)
+		xwayland_path = strdup(XWAYLAND_EXEC_PATH);
 
 	if (access(wayback_compositor_path, F_OK | X_OK) == -1) {
 		fprintf(stderr, "ERROR: wayback-compositor %s: inaccessible or not found/executable\n", wayback_compositor_path);
 		exit(EXIT_FAILURE);
 	}
-	if (access(XWAYLAND_EXEC_PATH, F_OK | X_OK) == -1) {
-		fprintf(stderr, "ERROR: Xwayland %s: inaccessible or not found/executable\n", XWAYLAND_EXEC_PATH);
+	if (access(xwayland_path, F_OK | X_OK) == -1) {
+		fprintf(stderr, "ERROR: Xwayland %s: inaccessible or not found/executable\n", xwayland_path);
 		exit(EXIT_FAILURE);
 	}
 
