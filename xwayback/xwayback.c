@@ -230,14 +230,12 @@ void handle_exit(int sig)
 
 void handle_segv(int sig)
 {
-	wayback_log(LOG_ERROR, "Received SIGSEGV (Segmentation fault)!");
-	wayback_log(
-		LOG_ERROR,
-		"This is a bug!\nPlease visit https://gitlab.freedesktop.org/wayback/wayback/-/issues/ to "
-		"check\nif this bug has already been reported.  If not, fill a new bug report with "
-		"steps\nto reproduce this error.  If you need assistance, join #wayback on Libera.Chat\nor "
-		"#wayback:catircservices.org on Matrix.");
-
+	char errormsg[BUFSIZ] = "[ERROR] (Xwayback): Received SIGSEGV (Segmentation fault)!\n"
+							"This is a bug!\nPlease visit https://gitlab.freedesktop.org/wayback/wayback/-/issues/ to"
+							"check\nif this bug has already been reported.  If not, fill a new bug report with "
+							"steps\nto reproduce this error.  If you need assistance, join #wayback on Libera.Chat\nor "
+							"#wayback:catircservices.org on Matrix.\n";
+	write(STDERR_FILENO, errormsg, strlen(errormsg));
 	handle_exit(sig);
 }
 
