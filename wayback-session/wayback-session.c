@@ -5,22 +5,24 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
-#include <getopt.h>
-#include <unistd.h>
-#include <dirent.h>
+#include "wayback_log.h"
+
 #include <ctype.h>
+#include <dirent.h>
+#include <getopt.h>
 #include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/wait.h>
-#include <wayback_log.h>
+#include <unistd.h>
 
 pid_t xwayback_pid;
 pid_t session_pid;
 
-char *get_xinitrc_path() {
+char *get_xinitrc_path()
+{
 	char *home = getenv("HOME");
 	if (home) {
 		char *xinitrc;
@@ -28,20 +30,21 @@ char *get_xinitrc_path() {
 			wayback_log(LOG_ERROR, "Unable to get xinitrc");
 			exit(EXIT_FAILURE);
 		}
-		if (access(xinitrc, F_OK|R_OK) == 0)
+		if (access(xinitrc, F_OK | R_OK) == 0)
 			return xinitrc;
 		free(xinitrc);
 	}
 
-	if (access("/etc/X11/xinit/xinitrc", F_OK|R_OK) == 0)
+	if (access("/etc/X11/xinit/xinitrc", F_OK | R_OK) == 0)
 		return strdup("/etc/X11/xinit/xinitrc");
 	wayback_log(LOG_ERROR, "Unable to find xinitrc file");
 	exit(EXIT_FAILURE);
 }
 
-void handle_child_exit(int sig) {
+void handle_child_exit(int sig)
+{
 	pid_t pid = waitpid(-1, NULL, WNOHANG);
-	if (pid == session_pid|| pid == xwayback_pid) {
+	if (pid == session_pid || pid == xwayback_pid) {
 		if (pid == session_pid && xwayback_pid > 0)
 			kill(xwayback_pid, SIGTERM);
 		if (pid == xwayback_pid && session_pid > 0)
@@ -50,7 +53,8 @@ void handle_child_exit(int sig) {
 	}
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
 	wayback_log_init("wayback-session", LOG_INFO, NULL);
 
 	char **session_cmd;
@@ -75,16 +79,16 @@ int main(int argc, char* argv[]) {
 		wayback_log(LOG_INFO, "Launching with fd %d", fd[1]);
 		char fd_str[BUFSIZ];
 		snprintf(fd_str, BUFSIZ, "%d", fd[1]);
-		execlp("Xwayback", "Xwayback", "--displayfd", fd_str, (void*)NULL);
+		execlp("Xwayback", "Xwayback", "--displayfd", fd_str, (void *)NULL);
 		wayback_log(LOG_ERROR, "Failed to launch Xwayback");
 		exit(EXIT_FAILURE);
 	}
 
-	char buffer[BUFSIZ-1];
+	char buffer[BUFSIZ - 1];
 	close(fd[1]);
-	ssize_t n = read(fd[0], buffer, sizeof(buffer)-1);
+	ssize_t n = read(fd[0], buffer, sizeof(buffer) - 1);
 	if (n > 0) {
-		buffer[n-1] = '\0'; // Convert from newline-terminated to null-terminated string
+		buffer[n - 1] = '\0'; // Convert from newline-terminated to null-terminated string
 		wayback_log(LOG_INFO, "Received display %s", buffer);
 	}
 
@@ -96,7 +100,7 @@ int main(int argc, char* argv[]) {
 		setenv("XDG_SESSION_TYPE", "x11", true);
 		setenv("DISPLAY", x_display, true);
 		if (xinitrc_path != NULL) {
-			execlp("sh", "sh", xinitrc_path, (void*)NULL);
+			execlp("sh", "sh", xinitrc_path, (void *)NULL);
 		} else if (session_cmd != NULL) {
 			execvp(session_cmd[0], session_cmd);
 		}
@@ -105,7 +109,7 @@ int main(int argc, char* argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	while(1)
+	while (1)
 		pause();
 	return 0;
 }

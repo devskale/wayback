@@ -1,5 +1,17 @@
 stages:
+    - style
     - build
+
+clang-format:
+    image: quay.io/almalinuxorg/almalinux:10
+    stage: style
+    cache:
+      key: dnf-cache
+      paths:
+        - dnf-cache/
+    script: |
+          dnf --setopt=cachedir=`pwd`/dnf-cache --assumeyes install git-clang-format
+          git clang-format --diff --commit ${CI_COMMIT_SHA}
 
 alpine:
     image: docker.io/alpine:edge
