@@ -22,10 +22,13 @@ Xwayback - experimental X11 compatibility layer
     *WAYBACK_COMPOSITOR_PATH*
         Path to wayback-compositor
 
+    *XWAYLAND_PATH*
+        Path to Xwayland
+
 # LICENSE
 
 MIT
 
 # SEE ALSO
 
-*wayback-session*(1), *Xserver(1)*, *Xorg(1)*
+*wayback-session*(1), *Xserver(1)*, *Xorg(1)*, *Xwayland*(1)
