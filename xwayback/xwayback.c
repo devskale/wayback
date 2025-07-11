@@ -6,21 +6,23 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
+#include "wayback_log.h"
+#include "xdg-output-unstable-v1-client-protocol.h"
+
 #include <getopt.h>
-#include <unistd.h>
 #include <signal.h>
-#include <sys/wait.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 #include <wayland-client.h>
-#include "xdg-output-unstable-v1-client-protocol.h"
-#include <wayback_log.h>
 
-struct xwayback {
+struct xwayback
+{
 	struct wl_display *display;
 
 	char *wayland_socket;
@@ -32,7 +34,8 @@ struct xwayback {
 	struct wl_list outputs;
 };
 
-struct xway_output {
+struct xway_output
+{
 	struct wl_list link;
 	struct wl_output *output;
 	struct zxdg_output_v1 *xdg_output;
@@ -56,13 +59,21 @@ struct xway_output {
 pid_t comp_pid;
 pid_t xway_pid;
 
-static void output_geometry(void *data, struct wl_output *wl_output, int32_t x,
-		int32_t y, int32_t width_mm, int32_t height_mm, int32_t subpixel,
-		const char *make, const char *model, int32_t transform) {
+static void output_geometry(void *data,
+                            struct wl_output *wl_output,
+                            int32_t x,
+                            int32_t y,
+                            int32_t width_mm,
+                            int32_t height_mm,
+                            int32_t subpixel,
+                            const char *make,
+                            const char *model,
+                            int32_t transform)
+{
 	struct xway_output *output = data;
 
-	free (output->make);
-	free (output->model);
+	free(output->make);
+	free(output->model);
 
 	output->physical_height = height_mm;
 	output->physical_width = width_mm;
@@ -73,8 +84,13 @@ static void output_geometry(void *data, struct wl_output *wl_output, int32_t x,
 	return;
 }
 
-static void output_mode(void *data, struct wl_output *wl_output, uint32_t flags,
-		int32_t width, int32_t height, int32_t refresh) {
+static void output_mode(void *data,
+                        struct wl_output *wl_output,
+                        uint32_t flags,
+                        int32_t width,
+                        int32_t height,
+                        int32_t refresh)
+{
 	struct xway_output *output = data;
 	output->refresh = (float)refresh / 1000;
 	output->width = width;
@@ -82,12 +98,14 @@ static void output_mode(void *data, struct wl_output *wl_output, uint32_t flags,
 	return;
 }
 
-static void output_done(void *data, struct wl_output *wl_output) {
+static void output_done(void *data, struct wl_output *wl_output)
+{
 	// No extra output processing needed
 	return;
 }
 
-static void output_scale(void *data, struct wl_output *wl_output, int32_t factor) {
+static void output_scale(void *data, struct wl_output *wl_output, int32_t factor)
+{
 	struct xway_output *output = data;
 	output->scale = factor;
 	return;
@@ -101,34 +119,42 @@ static const struct wl_output_listener output_listener = {
 };
 
 static void xdg_output_handle_logical_position(void *data,
-		struct zxdg_output_v1 *xdg_output, int32_t x, int32_t y) {
+                                               struct zxdg_output_v1 *xdg_output,
+                                               int32_t x,
+                                               int32_t y)
+{
 	struct xway_output *output = data;
 	output->x = x;
 	output->y = y;
 }
 
 static void xdg_output_handle_logical_size(void *data,
-		struct zxdg_output_v1 *xdg_output, int32_t width, int32_t height) {
+                                           struct zxdg_output_v1 *xdg_output,
+                                           int32_t width,
+                                           int32_t height)
+{
 	struct xway_output *output = data;
 	output->height = height;
 	output->width = width;
 }
 
-static void xdg_output_handle_done(void *data,
-		struct zxdg_output_v1 *xdg_output) {
+static void xdg_output_handle_done(void *data, struct zxdg_output_v1 *xdg_output)
+{
 	// No extra processing is currently required.
 	return;
 }
 
-static void xdg_output_handle_name(void *data,
-		struct zxdg_output_v1 *xdg_output, const char *name) {
+static void xdg_output_handle_name(void *data, struct zxdg_output_v1 *xdg_output, const char *name)
+{
 	struct xway_output *output = data;
 	free(output->name);
 	output->name = strdup(name);
 }
 
 static void xdg_output_handle_description(void *data,
-		struct zxdg_output_v1 *xdg_output, const char *description) {
+                                          struct zxdg_output_v1 *xdg_output,
+                                          const char *description)
+{
 	struct xway_output *output = data;
 	free(output->description);
 	output->description = strdup(description);
@@ -142,17 +168,23 @@ static const struct zxdg_output_v1_listener xdg_output_listener = {
 	.description = xdg_output_handle_description,
 };
 
-static void add_xdg_output(struct xway_output *output) {
+static void add_xdg_output(struct xway_output *output)
+{
 	if (output->xdg_output != NULL) {
 		return;
 	}
 
-	output->xdg_output = zxdg_output_manager_v1_get_xdg_output(output->xwayback->xdg_output_manager, output->output);
+	output->xdg_output =
+		zxdg_output_manager_v1_get_xdg_output(output->xwayback->xdg_output_manager, output->output);
 	zxdg_output_v1_add_listener(output->xdg_output, &xdg_output_listener, output);
 }
 
-static void handle_global(void *data, struct wl_registry *registry,
-		uint32_t name, const char *interface, uint32_t version) {
+static void handle_global(void *data,
+                          struct wl_registry *registry,
+                          uint32_t name,
+                          const char *interface,
+                          uint32_t version)
+{
 	struct xwayback *xwayback = data;
 	if (strcmp(interface, wl_output_interface.name) == 0) {
 		struct xway_output *output = calloc(1, sizeof(struct xway_output));
@@ -168,7 +200,8 @@ static void handle_global(void *data, struct wl_registry *registry,
 			add_xdg_output(output);
 		}
 	} else if (strcmp(interface, zxdg_output_manager_v1_interface.name) == 0) {
-		xwayback->xdg_output_manager = wl_registry_bind(registry, name, &zxdg_output_manager_v1_interface, 2);
+		xwayback->xdg_output_manager =
+			wl_registry_bind(registry, name, &zxdg_output_manager_v1_interface, 2);
 	}
 }
 
@@ -177,7 +210,8 @@ static const struct wl_registry_listener registry_listener = {
 	.global_remove = NULL, // TODO: handle_global_remove
 };
 
-void handle_child_exit(int sig) {
+void handle_child_exit(int sig)
+{
 	pid_t pid = waitpid(-1, NULL, WNOHANG);
 	if (pid == comp_pid || pid == xway_pid) {
 		if (pid == comp_pid && xway_pid > 0)
@@ -188,14 +222,21 @@ void handle_child_exit(int sig) {
 	}
 }
 
-void handle_exit(int sig) {
+void handle_exit(int sig)
+{
 	kill(xway_pid, SIGTERM);
 	kill(comp_pid, SIGTERM);
 }
 
-void handle_segv(int sig) {
+void handle_segv(int sig)
+{
 	wayback_log(LOG_ERROR, "Received SIGSEGV (Segmentation fault)!");
-	wayback_log(LOG_ERROR, "This is a bug!\nPlease visit https://gitlab.freedesktop.org/wayback/wayback/-/issues/ to check\nif this bug has already been reported.  If not, fill a new bug report with steps\nto reproduce this error.  If you need assistance, join #wayback on Libera.Chat\nor #wayback:catircservices.org on Matrix.");
+	wayback_log(
+		LOG_ERROR,
+		"This is a bug!\nPlease visit https://gitlab.freedesktop.org/wayback/wayback/-/issues/ to "
+		"check\nif this bug has already been reported.  If not, fill a new bug report with "
+		"steps\nto reproduce this error.  If you need assistance, join #wayback on Libera.Chat\nor "
+		"#wayback:catircservices.org on Matrix.");
 
 	handle_exit(sig);
 }
@@ -206,12 +247,14 @@ static const char *basename_c(const char *path)
 	return slash ? ++slash : path;
 }
 
-__attribute__((noreturn)) static void usage(char *binname) {
+__attribute__((noreturn)) static void usage(char *binname)
+{
 	fprintf(stderr, "usage: %s [-d :display]\n", binname);
 	exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
 	struct xwayback *xwayback = malloc(sizeof(struct xwayback));
 	int socket_xwayback[2];
 	int socket_xwayland[2];
@@ -225,11 +268,9 @@ int main(int argc, char* argv[]) {
 	signal(SIGTERM, handle_exit);
 
 	// TODO: Implement all options from Xserver(1) and Xorg(1)
-	static struct option long_options[] = {
-		{"display", required_argument, 0, 'd'},
-		{"displayfd", required_argument, 0, 'f'},
-		{0, 0, 0, 0}
-	};
+	static struct option long_options[] = { { "display", required_argument, 0, 'd' },
+		                                    { "displayfd", required_argument, 0, 'f' },
+		                                    { 0, 0, 0, 0 } };
 
 	int option_index = 0;
 	while ((opt = getopt_long(argc, argv, "d:f:", long_options, &option_index)) != -1) {
@@ -267,11 +308,14 @@ int main(int argc, char* argv[]) {
 		xwayland_path = strdup(XWAYLAND_EXEC_PATH);
 
 	if (access(wayback_compositor_path, F_OK | X_OK) == -1) {
-		wayback_log(LOG_ERROR, "wayback-compositor executable %s not found or not executable", wayback_compositor_path);
+		wayback_log(LOG_ERROR,
+		            "wayback-compositor executable %s not found or not executable",
+		            wayback_compositor_path);
 		exit(EXIT_FAILURE);
 	}
 	if (access(xwayland_path, F_OK | X_OK) == -1) {
-		wayback_log(LOG_ERROR, "Xwayland executable %s not found or not executable", XWAYLAND_EXEC_PATH);
+		wayback_log(
+			LOG_ERROR, "Xwayland executable %s not found or not executable", XWAYLAND_EXEC_PATH);
 		exit(EXIT_FAILURE);
 	}
 
@@ -292,10 +336,15 @@ int main(int argc, char* argv[]) {
 		snprintf(fd_xwayback, sizeof(fd_xwayback), "%d", socket_xwayback[0]);
 		snprintf(fd_xwayland, sizeof(fd_xwayland), "%d", socket_xwayland[0]);
 
-		wayback_log(LOG_INFO, "Passed descriptor Xwayback: %s; Xwayland %s", fd_xwayback, fd_xwayland);
+		wayback_log(
+			LOG_INFO, "Passed descriptor Xwayback: %s; Xwayland %s", fd_xwayback, fd_xwayland);
 		close(socket_xwayback[1]);
 		close(socket_xwayland[1]);
-		execlp(wayback_compositor_path, wayback_compositor_path, fd_xwayback, fd_xwayland, (void *)NULL);
+		execlp(wayback_compositor_path,
+		       wayback_compositor_path,
+		       fd_xwayback,
+		       fd_xwayland,
+		       (void *)NULL);
 		wayback_log(LOG_ERROR, "Failed to launch wayback-compositor");
 		exit(EXIT_FAILURE);
 	}
@@ -335,12 +384,33 @@ int main(int argc, char* argv[]) {
 		setenv("WAYLAND_SOCKET", way_display, true);
 
 		char geometry[4096];
-		snprintf(geometry, sizeof(geometry), "%dx%d", xwayback->first_output->width, xwayback->first_output->height);
+		snprintf(geometry,
+		         sizeof(geometry),
+		         "%dx%d",
+		         xwayback->first_output->width,
+		         xwayback->first_output->height);
 
 		if (x_display)
-			execl(xwayland_path, basename_c(xwayland_path), x_display, "-fullscreen", "-retro", "-terminate", "-geometry", geometry, (void*)NULL);
+			execl(xwayland_path,
+			      basename_c(xwayland_path),
+			      x_display,
+			      "-fullscreen",
+			      "-retro",
+			      "-terminate",
+			      "-geometry",
+			      geometry,
+			      (void *)NULL);
 		else {
-			execl(xwayland_path, basename_c(xwayland_path), "-displayfd", displayfd, "-fullscreen", "-retro", "-terminate", "-geometry", geometry, (void*)NULL);
+			execl(xwayland_path,
+			      basename_c(xwayland_path),
+			      "-displayfd",
+			      displayfd,
+			      "-fullscreen",
+			      "-retro",
+			      "-terminate",
+			      "-geometry",
+			      geometry,
+			      (void *)NULL);
 		}
 		wayback_log(LOG_ERROR, "Failed to launch Xwayland");
 		exit(EXIT_FAILURE);
