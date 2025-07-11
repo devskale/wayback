@@ -33,6 +33,30 @@ Installing:
 meson install
 ```
 
+## Distribution packages
+
+While Wayback is still alpha-quality software as of now there are packages in 
+various popular distributions maintained by folks in the Wayback community.
+
+***NOTE: These packages are NOT supported by Wayback developers, and as Wayback
+development continues they may become out of date.  Wayback is still
+alpha-quality software and development is rapidly moving, so before reporting any 
+issues we ask you to replicate them on the git `main` branch to make sure they
+are still applicable to the latest code.***
+
+- Alpine Linux edge: [`wayback` and `wayback-doc`][alpine-pkg] in the `testing` 
+  repository
+- ALT Linux: [`wayback`][alt-pkg]
+- Arch Linux: [`wayback-x11-git`][aur-pkg] in the AUR
+- Fedora, RHEL: [`ngompa/wayback`][copr-pkg] Copr repository
+- T2 SDE: [`wayback`][t2sde-pkg]
+
+[alpine-pkg]: https://pkgs.alpinelinux.org/packages?name=wayback*&branch=edge&repo=&arch=&origin=&flagged=&maintainer=
+[alt-pkg]:    https://packages.altlinux.org/en/sisyphus/srpms/wayback/
+[aur-pkg]:    https://aur.archlinux.org/packages/wayback-x11-git
+[copr-pkg]:   https://copr.fedorainfracloud.org/coprs/ngompa/wayback/
+[t2sde-pkg]:  https://t2sde.org/packages/wayback
+
 ## Discussion
 
 - Matrix: [`#wayback:catircservices.org`](https://matrix.to/#/#wayback:catircservices.org)
