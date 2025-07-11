@@ -15,6 +15,7 @@
 #include <ctype.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <wayback_log.h>
 
 pid_t xwayback_pid;
 pid_t session_pid;
@@ -24,7 +25,7 @@ char *get_xinitrc_path() {
 	if (home) {
 		char *xinitrc;
 		if (asprintf(&xinitrc, "%s/.xinitrc", home) == -1) {
-			fprintf(stderr, "ERROR: Unable to get xinitrc\n");
+			wayback_log(LOG_ERROR, "Unable to get xinitrc");
 			exit(EXIT_FAILURE);
 		}
 		if (access(xinitrc, F_OK|R_OK) == 0)
@@ -34,7 +35,7 @@ char *get_xinitrc_path() {
 
 	if (access("/etc/X11/xinit/xinitrc", F_OK|R_OK) == 0)
 		return strdup("/etc/X11/xinit/xinitrc");
-	fprintf(stderr, "ERROR: Unable to find xinitrc file.\n");
+	wayback_log(LOG_ERROR, "Unable to find xinitrc file");
 	exit(EXIT_FAILURE);
 }
 
@@ -50,6 +51,8 @@ void handle_child_exit(int sig) {
 }
 
 int main(int argc, char* argv[]) {
+	wayback_log_init("wayback-session", LOG_INFO, NULL);
+
 	char **session_cmd;
 	char *xinitrc_path = NULL;
 	signal(SIGCHLD, handle_child_exit);
@@ -62,18 +65,18 @@ int main(int argc, char* argv[]) {
 
 	int fd[2];
 	if (pipe(fd) == -1) {
-		fprintf(stderr, "ERROR: Failed to create pipe\n");
+		wayback_log(LOG_ERROR, "Failed to create pipe");
 		exit(EXIT_FAILURE);
 	}
 
 	xwayback_pid = fork();
 	if (xwayback_pid == 0) {
 		close(fd[0]);
-		printf("Launching with fd %d\n", fd[1]);
+		wayback_log(LOG_INFO, "Launching with fd %d", fd[1]);
 		char fd_str[BUFSIZ];
 		snprintf(fd_str, BUFSIZ, "%d", fd[1]);
 		execlp("Xwayback", "Xwayback", "--displayfd", fd_str, (void*)NULL);
-		fprintf(stderr, "ERROR: Failed to launch Xwayback\n");
+		wayback_log(LOG_ERROR, "Failed to launch Xwayback");
 		exit(EXIT_FAILURE);
 	}
 
@@ -82,7 +85,7 @@ int main(int argc, char* argv[]) {
 	ssize_t n = read(fd[0], buffer, sizeof(buffer)-1);
 	if (n > 0) {
 		buffer[n-1] = '\0'; // Convert from newline-terminated to null-terminated string
-		printf("Received display %s\n", buffer);
+		wayback_log(LOG_INFO, "Received display %s", buffer);
 	}
 
 	char x_display[BUFSIZ];
@@ -97,14 +100,12 @@ int main(int argc, char* argv[]) {
 		} else if (session_cmd != NULL) {
 			execvp(session_cmd[0], session_cmd);
 		}
-		fprintf(stderr, "ERROR: Failed to launch session\n");
+		wayback_log(LOG_ERROR, "Failed to launch session");
 		free(xinitrc_path);
 		exit(EXIT_FAILURE);
 	}
 
 	while(1)
 		pause();
-	free(xinitrc_path);
-
 	return 0;
 }

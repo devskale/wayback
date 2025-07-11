@@ -18,6 +18,7 @@
 #include <sys/types.h>
 #include <wayland-client.h>
 #include "xdg-output-unstable-v1-client-protocol.h"
+#include <wayback_log.h>
 
 struct xwayback {
 	struct wl_display *display;
@@ -193,8 +194,8 @@ void handle_exit(int sig) {
 }
 
 void handle_segv(int sig) {
-	fprintf(stderr, "FATAL: Received SIGSEGV (Segmentation fault)!\n");
-	fprintf(stderr, "This is a bug!\nPlease visit https://gitlab.freedesktop.org/wayback/wayback/-/issues/ to check\nif this bug has already been reported.  If not, fill a new bug report with steps\nto reproduce this error.  If you need assistance, join #wayback on Libera.Chat\nor #wayback:catircservices.org on Matrix.\n");
+	wayback_log(LOG_ERROR, "Received SIGSEGV (Segmentation fault)!");
+	wayback_log(LOG_ERROR, "This is a bug!\nPlease visit https://gitlab.freedesktop.org/wayback/wayback/-/issues/ to check\nif this bug has already been reported.  If not, fill a new bug report with steps\nto reproduce this error.  If you need assistance, join #wayback on Libera.Chat\nor #wayback:catircservices.org on Matrix.");
 
 	handle_exit(sig);
 }
@@ -244,14 +245,16 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+	wayback_log_init("Xwayback", LOG_INFO, NULL);
+
 	if (unsetenv("WAYLAND_DISPLAY") == -1)
 		// not the end of the world if it couldn't be unset
-		printf("Xwayback: could not unset WAYLAND_DISPLAY\n");
+		wayback_log(LOG_WARN, "Could not unset WAYLAND_DISPLAY");
 
 	// displayfd takes priority
 	// TODO: Check if this is also the case in Xserver(7)
 	if (displayfd != NULL) {
-		printf("Xwayback: using displayfd\n");
+		wayback_log(LOG_INFO, "Using displayfd");
 		x_display = NULL;
 	}
 
@@ -264,21 +267,21 @@ int main(int argc, char* argv[]) {
 		xwayland_path = strdup(XWAYLAND_EXEC_PATH);
 
 	if (access(wayback_compositor_path, F_OK | X_OK) == -1) {
-		fprintf(stderr, "ERROR: wayback-compositor %s: inaccessible or not found/executable\n", wayback_compositor_path);
+		wayback_log(LOG_ERROR, "wayback-compositor executable %s not found or not executable", wayback_compositor_path);
 		exit(EXIT_FAILURE);
 	}
 	if (access(xwayland_path, F_OK | X_OK) == -1) {
-		fprintf(stderr, "ERROR: Xwayland %s: inaccessible or not found/executable\n", xwayland_path);
+		wayback_log(LOG_ERROR, "Xwayland executable %s not found or not executable", XWAYLAND_EXEC_PATH);
 		exit(EXIT_FAILURE);
 	}
 
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, socket_xwayback) == -1) {
-		fprintf(stderr, "ERROR: unable to create xwayback socket\n");
+		wayback_log(LOG_ERROR, "Unable to create Xwayback socket");
 		exit(EXIT_FAILURE);
 	}
 
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, socket_xwayland) == -1) {
-		fprintf(stderr, "ERROR: unable to create xwayland socket\n");
+		wayback_log(LOG_ERROR, "Unable to create Xwayland socket");
 		exit(EXIT_FAILURE);
 	}
 
@@ -289,11 +292,11 @@ int main(int argc, char* argv[]) {
 		snprintf(fd_xwayback, sizeof(fd_xwayback), "%d", socket_xwayback[0]);
 		snprintf(fd_xwayland, sizeof(fd_xwayland), "%d", socket_xwayland[0]);
 
-		printf("Xwayback: passed descriptor xwayback: %s; xwayland: %s\n", fd_xwayback, fd_xwayland);
+		wayback_log(LOG_INFO, "Passed descriptor Xwayback: %s; Xwayland %s", fd_xwayback, fd_xwayland);
 		close(socket_xwayback[1]);
 		close(socket_xwayland[1]);
 		execlp(wayback_compositor_path, wayback_compositor_path, fd_xwayback, fd_xwayland, (void *)NULL);
-		fprintf(stderr, "ERROR: failed to launch wayback-compositor\n");
+		wayback_log(LOG_ERROR, "Failed to launch wayback-compositor");
 		exit(EXIT_FAILURE);
 	}
 
@@ -310,7 +313,7 @@ int main(int argc, char* argv[]) {
 
 	xwayback->display = wl_display_connect(NULL);
 	if (!xwayback->display) {
-		fprintf(stderr, "ERROR: unable to connect to wayback-compositor.\n");
+		wayback_log(LOG_ERROR, "Unable to connect to wayback-compositor");
 		exit(EXIT_FAILURE);
 	}
 
@@ -321,7 +324,7 @@ int main(int argc, char* argv[]) {
 	wl_display_roundtrip(xwayback->display);
 	wl_display_roundtrip(xwayback->display); // xdg-output requires two roundtrips
 	if (xwayback->first_output == NULL) {
-		fprintf(stderr, "ERROR: unable to get first output\n");
+		wayback_log(LOG_ERROR, "Unable to get outputs");
 		exit(EXIT_FAILURE);
 	}
 
@@ -339,7 +342,7 @@ int main(int argc, char* argv[]) {
 		else {
 			execl(xwayland_path, basename_c(xwayland_path), "-displayfd", displayfd, "-fullscreen", "-retro", "-terminate", "-geometry", geometry, (void*)NULL);
 		}
-		fprintf(stderr, "ERROR: failed to launch Xwayland\n");
+		wayback_log(LOG_ERROR, "Failed to launch Xwayland");
 		exit(EXIT_FAILURE);
 	}
 

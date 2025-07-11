@@ -30,6 +30,7 @@ endif
 xwayland_executable_path = xwayland.get_variable(pkgconfig: 'xwayland')
 add_global_arguments('-DXWAYLAND_EXEC_PATH="@0@"'.format(xwayland_executable_path), language : 'c')
 
+subdir('common')
 subdir('protocol')
 subdir('wayback-compositor')
 subdir('wayback-session')
