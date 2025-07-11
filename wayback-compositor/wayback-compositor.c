@@ -922,6 +922,26 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	char *output = getenv("WAYBACK_OUTPUT");
+	bool have_output = false;
+	if (output != NULL) {
+		struct tinywl_output *out, *out_tmp;
+		wl_list_for_each_safe(out, out_tmp, &server.outputs, link) {
+			char *output_make_model;
+			asprintf(&output_make_model, "%s %s", out->wlr_output->make, out->wlr_output->model);
+			bool enabled = (strcmp(output_make_model, output) == 0) || (strcmp(out->wlr_output->name, output) == 0);
+			if (!enabled)
+				wlr_output_destroy(out->wlr_output);
+			else
+				have_output = true;
+		}
+	}
+
+	if (!have_output && output != NULL) {
+		wlr_log(WLR_ERROR, "No output enabled");
+		exit(EXIT_FAILURE);
+	}
+
 	/* Run the Wayland event loop. This does not return until you exit the
 	 * compositor. Starting the backend rigged up all of the necessary event
 	 * loop configuration to listen to libinput events, DRM events, generate

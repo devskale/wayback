@@ -194,11 +194,11 @@ static void handle_global(void *data,
 		output->wl_name = name;
 		wl_list_init(&output->link);
 		wl_list_insert(&xwayback->outputs, &output->link);
+
 		if (xwayback->first_output == NULL)
 			xwayback->first_output = output;
-		if (xwayback->xdg_output_manager != NULL) {
+		if (xwayback->xdg_output_manager != NULL)
 			add_xdg_output(output);
-		}
 	} else if (strcmp(interface, zxdg_output_manager_v1_interface.name) == 0) {
 		xwayback->xdg_output_manager =
 			wl_registry_bind(registry, name, &zxdg_output_manager_v1_interface, 2);
@@ -230,11 +230,12 @@ void handle_exit(int sig)
 
 void handle_segv(int sig)
 {
-	char errormsg[BUFSIZ] = "[ERROR] (Xwayback): Received SIGSEGV (Segmentation fault)!\n"
-							"This is a bug!\nPlease visit https://gitlab.freedesktop.org/wayback/wayback/-/issues/ to"
-							"check\nif this bug has already been reported.  If not, fill a new bug report with "
-							"steps\nto reproduce this error.  If you need assistance, join #wayback on Libera.Chat\nor "
-							"#wayback:catircservices.org on Matrix.\n";
+	char errormsg[BUFSIZ] =
+		"[ERROR] (Xwayback): Received SIGSEGV (Segmentation fault)!\n"
+		"This is a bug!\nPlease visit https://gitlab.freedesktop.org/wayback/wayback/-/issues/ to "
+		"check\nif this bug has already been reported.  If not, fill a new bug report with "
+		"steps\nto reproduce this error.  If you need assistance, join #wayback on Libera.Chat\nor "
+		"#wayback:catircservices.org on Matrix.\n";
 	write(STDERR_FILENO, errormsg, strlen(errormsg));
 	handle_exit(sig);
 }
@@ -370,6 +371,18 @@ int main(int argc, char *argv[])
 	wl_registry_add_listener(registry, &registry_listener, xwayback);
 	wl_display_roundtrip(xwayback->display);
 	wl_display_roundtrip(xwayback->display); // xdg-output requires two roundtrips
+
+	char *output = getenv("WAYBACK_OUTPUT");
+	if (output != NULL) {
+		struct xway_output *out;
+		wl_list_for_each(out, &xwayback->outputs, link) {
+			char *output_make_model;
+			asprintf(&output_make_model, "%s %s", out->make, out->model);
+			if (strcmp(output_make_model, output) == 0 || strcmp(out->make, output) == 0)
+				xwayback->first_output = out;
+		}
+	}
+
 	if (xwayback->first_output == NULL) {
 		wayback_log(LOG_ERROR, "Unable to get outputs");
 		exit(EXIT_FAILURE);
