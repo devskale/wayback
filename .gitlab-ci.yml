@@ -11,7 +11,9 @@ clang-format:
         - dnf-cache/
     script: |
           dnf --setopt=cachedir=`pwd`/dnf-cache --assumeyes install git-clang-format
-          git clang-format --diff --commit ${CI_COMMIT_SHA}
+          git clang-format --diff --commit ${CI_MERGE_REQUEST_DIFF_BASE_SHA}
+    only:
+        - merge_requests
 
 alpine:
     image: docker.io/alpine:edge
@@ -33,6 +35,7 @@ alpine:
           meson compile -C builddir/ -v
     only:
         - branches
+        - merge_requests
 
 arch:
     image: ghcr.io/archlinux/archlinux:base-devel
@@ -54,6 +57,7 @@ arch:
           meson compile -C builddir/ -v
     only:
         - branches
+        - merge_requests
 
 fedora:
     image: quay.io/fedora/fedora:rawhide
@@ -79,3 +83,4 @@ fedora:
           meson compile -C builddir/ -v
     only:
         - branches
+        - merge_requests
