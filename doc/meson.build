@@ -5,6 +5,7 @@ if scdoc.found()
 
   manpages = [
     ['wayback-session.scdoc', 'wayback-session.1'],
+    ['Xwayback.scdoc', 'Xwayback.1'],
   ]
 
   foreach mp : manpages
