@@ -67,6 +67,16 @@ int main(int argc, char *argv[])
 		session_cmd = &argv[optind];
 	}
 
+	char *xwayback_path = getenv("XWAYBACK_PATH");
+	if (xwayback_path == NULL) {
+		xwayback_path = "Xwayback";
+	}
+
+	if (access(xwayback_path, X_OK) == -1) {
+		wayback_log(LOG_ERROR, "Xwayback executable %s not found or not executable", xwayback_path);
+		exit(EXIT_FAILURE);
+	}
+
 	int fd[2];
 	if (pipe(fd) == -1) {
 		wayback_log(LOG_ERROR, "Failed to create pipe");
@@ -79,7 +89,7 @@ int main(int argc, char *argv[])
 		wayback_log(LOG_INFO, "Launching with fd %d", fd[1]);
 		char *fd_str;
 		asprintf(&fd_str, "%d", fd[1]);
-		execlp("Xwayback", "Xwayback", "--displayfd", fd_str, (void *)NULL);
+		execlp(xwayback_path, xwayback_path, "--displayfd", fd_str, (void *)NULL);
 		wayback_log(LOG_ERROR, "Failed to launch Xwayback");
 		exit(EXIT_FAILURE);
 	}
