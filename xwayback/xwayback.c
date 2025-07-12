@@ -301,9 +301,9 @@ int main(int argc, char *argv[])
 	char *wayback_compositor_path = getenv("WAYBACK_COMPOSITOR_PATH");
 	char *xwayland_path = getenv("XWAYLAND_PATH");
 	if (wayback_compositor_path == NULL)
-		wayback_compositor_path = strdup(WAYBACK_COMPOSITOR_EXEC_PATH);
+		wayback_compositor_path = WAYBACK_COMPOSITOR_EXEC_PATH;
 	if (xwayland_path == NULL)
-		xwayland_path = strdup(XWAYLAND_EXEC_PATH);
+		xwayland_path = XWAYLAND_EXEC_PATH;
 
 	if (access(wayback_compositor_path, F_OK | X_OK) == -1) {
 		wayback_log(LOG_ERROR,
