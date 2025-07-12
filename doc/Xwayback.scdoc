@@ -14,19 +14,19 @@ Xwayback - experimental X11 compatibility layer
 
 # OPTIONS
 
-    *-d*, *--display* _<display>_
-        Launch Xwayback on the specified display number
+	*-d*, *--display* _<display>_
+		Launch Xwayback on the specified display number
 
 # ENVVARS
 
-    *WAYBACK_COMPOSITOR_PATH*
-        Path to wayback-compositor
+	*WAYBACK_COMPOSITOR_PATH*
+		Path to wayback-compositor
 
-    *XWAYLAND_PATH*
-        Path to Xwayland
+	*XWAYLAND_PATH*
+		Path to Xwayland
 
-    *WAYBACK_OUTPUT*
-        The output to use, either in the format "<Make> <model>" or the display ID (i.e. "eDP-1")
+	*WAYBACK_OUTPUT*
+		The output to use, either in the format "<Make> <model>" or the display ID (i.e. "eDP-1")
 
 # LICENSE
 
