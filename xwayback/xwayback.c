@@ -312,8 +312,7 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 	if (access(xwayland_path, F_OK | X_OK) == -1) {
-		wayback_log(
-			LOG_ERROR, "Xwayland executable %s not found or not executable", XWAYLAND_EXEC_PATH);
+		wayback_log(LOG_ERROR, "Xwayland executable %s not found or not executable", xwayland_path);
 		exit(EXIT_FAILURE);
 	}
 
