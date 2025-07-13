@@ -305,13 +305,13 @@ int main(int argc, char *argv[])
 	if (xwayland_path == NULL)
 		xwayland_path = XWAYLAND_EXEC_PATH;
 
-	if (access(wayback_compositor_path, F_OK | X_OK) == -1) {
+	if (access(wayback_compositor_path, X_OK) == -1) {
 		wayback_log(LOG_ERROR,
 		            "wayback-compositor executable %s not found or not executable",
 		            wayback_compositor_path);
 		exit(EXIT_FAILURE);
 	}
-	if (access(xwayland_path, F_OK | X_OK) == -1) {
+	if (access(xwayland_path, X_OK) == -1) {
 		wayback_log(LOG_ERROR, "Xwayland executable %s not found or not executable", xwayland_path);
 		exit(EXIT_FAILURE);
 	}
