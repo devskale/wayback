@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
 		                                    { 0, 0, 0, 0 } };
 
 	int option_index = 0;
-	while ((opt = getopt_long(argc, argv, "d:f:", long_options, &option_index)) != -1) {
+	while ((opt = getopt_long_only(argc, argv, "d:f:", long_options, &option_index)) != -1) {
 		switch (opt) {
 			case 'd':
 				x_display = optarg;
