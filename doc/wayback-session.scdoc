@@ -19,6 +19,13 @@ Its behaviour is similiar to that of *startx*(1), and the same xinitrc files are
 If no command is specified it will try to launch ~/.xinitrc.
 If ~/.xinitrc is not found, it will launch /etc/X11/xinit/xinitrc
 
+# ENVVARS
+
+	*XWAYBACK_PATH*
+		Path to Xwayback
+
+For other supported environment variables, see *Xwayback*(1) (section *ENVVARS*).
+
 # LICENSE
 
 MIT
