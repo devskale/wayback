@@ -30,12 +30,12 @@ char *get_xinitrc_path()
 			wayback_log(LOG_ERROR, "Unable to get xinitrc");
 			exit(EXIT_FAILURE);
 		}
-		if (access(xinitrc, F_OK | R_OK) == 0)
+		if (access(xinitrc, R_OK) == 0)
 			return xinitrc;
 		free(xinitrc);
 	}
 
-	if (access("/etc/X11/xinit/xinitrc", F_OK | R_OK) == 0)
+	if (access("/etc/X11/xinit/xinitrc", R_OK) == 0)
 		return strdup("/etc/X11/xinit/xinitrc");
 	wayback_log(LOG_ERROR, "Unable to find xinitrc file");
 	exit(EXIT_FAILURE);
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 {
 	wayback_log_init("wayback-session", LOG_INFO, NULL);
 
-	char **session_cmd;
+	char **session_cmd = NULL;
 	char *xinitrc_path = NULL;
 	signal(SIGCHLD, handle_child_exit);
 
