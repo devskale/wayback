@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 {
 	wayback_log_init("wayback-session", LOG_INFO, NULL);
 
-	char **session_cmd;
+	char **session_cmd = NULL;
 	char *xinitrc_path = NULL;
 	signal(SIGCHLD, handle_child_exit);
 
