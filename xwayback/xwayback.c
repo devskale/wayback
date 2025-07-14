@@ -9,6 +9,7 @@
 #include "wayback_log.h"
 #include "xdg-output-unstable-v1-client-protocol.h"
 
+#include <errno.h>
 #include <getopt.h>
 #include <signal.h>
 #include <stdbool.h>
@@ -342,7 +343,7 @@ int main(int argc, char *argv[])
 		       fd_xwayback,
 		       fd_xwayland,
 		       (void *)NULL);
-		wayback_log(LOG_ERROR, "Failed to launch wayback-compositor");
+		wayback_log(LOG_ERROR, "Failed to launch wayback-compositor: %s", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 

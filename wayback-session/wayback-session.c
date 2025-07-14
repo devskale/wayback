@@ -9,6 +9,7 @@
 
 #include <ctype.h>
 #include <dirent.h>
+#include <errno.h>
 #include <getopt.h>
 #include <signal.h>
 #include <stdbool.h>
@@ -88,7 +89,7 @@ int main(int argc, char *argv[])
 		char *fd_str;
 		asprintf(&fd_str, "%d", fd[1]);
 		execlp(xwayback_path, xwayback_path, "--displayfd", fd_str, (void *)NULL);
-		wayback_log(LOG_ERROR, "Failed to launch Xwayback");
+		wayback_log(LOG_ERROR, "Failed to launch Xwayback: %s", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
