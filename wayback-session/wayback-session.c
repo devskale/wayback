@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
 		} else if (session_cmd != NULL) {
 			execvp(session_cmd[0], session_cmd);
 		}
-		wayback_log(LOG_ERROR, "Failed to launch session");
+		wayback_log(LOG_ERROR, "Failed to launch session: %s", strerror(errno));
 		free(xinitrc_path);
 		exit(EXIT_FAILURE);
 	}
