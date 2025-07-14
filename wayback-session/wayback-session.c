@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include "utils.h"
 #include "wayback_log.h"
 
 #include <ctype.h>
@@ -27,17 +28,15 @@ char *get_xinitrc_path()
 	char *home = getenv("HOME");
 	if (home) {
 		char *xinitrc;
-		if (asprintf(&xinitrc, "%s/.xinitrc", home) == -1) {
-			wayback_log(LOG_ERROR, "Unable to get xinitrc");
-			exit(EXIT_FAILURE);
-		}
+		asprintf_or_exit(&xinitrc, "%s/.xinitrc", home);
 		if (access(xinitrc, R_OK) == 0)
 			return xinitrc;
 		free(xinitrc);
 	}
 
 	if (access("/etc/X11/xinit/xinitrc", R_OK) == 0)
-		return strdup("/etc/X11/xinit/xinitrc");
+		return strdup_or_exit("/etc/X11/xinit/xinitrc");
+
 	wayback_log(LOG_ERROR, "Unable to find xinitrc file");
 	exit(EXIT_FAILURE);
 }
@@ -87,7 +86,7 @@ int main(int argc, char *argv[])
 		close(fd[0]);
 		wayback_log(LOG_INFO, "Launching with fd %d", fd[1]);
 		char *fd_str;
-		asprintf(&fd_str, "%d", fd[1]);
+		asprintf_or_exit(&fd_str, "%d", fd[1]);
 		execlp(xwayback_path, xwayback_path, "-displayfd", fd_str, (void *)NULL);
 		wayback_log(LOG_ERROR, "Failed to launch Xwayback: %s", strerror(errno));
 		exit(EXIT_FAILURE);
@@ -102,7 +101,7 @@ int main(int argc, char *argv[])
 	}
 
 	char *x_display;
-	asprintf(&x_display, ":%s", buffer);
+	asprintf_or_exit(&x_display, ":%s", buffer);
 
 	session_pid = fork();
 	if (session_pid == 0) {
