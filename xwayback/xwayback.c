@@ -307,8 +307,8 @@ int main(int argc, char *argv[])
 	}
 
 	// check if the compositor/Xwayland binaries are accessible before doing anything else
-	char *wayback_compositor_path = getenv("WAYBACK_COMPOSITOR_PATH");
-	char *xwayland_path = getenv("XWAYLAND_PATH");
+	const char *wayback_compositor_path = getenv("WAYBACK_COMPOSITOR_PATH");
+	const char *xwayland_path = getenv("XWAYLAND_PATH");
 	if (wayback_compositor_path == NULL)
 		wayback_compositor_path = WAYBACK_COMPOSITOR_EXEC_PATH;
 	if (xwayland_path == NULL)
@@ -382,7 +382,7 @@ int main(int argc, char *argv[])
 	wl_display_roundtrip(xwayback->display);
 	wl_display_roundtrip(xwayback->display); // xdg-output requires two roundtrips
 
-	char *output = getenv("WAYBACK_OUTPUT");
+	const char *output = getenv("WAYBACK_OUTPUT");
 	if (output != NULL) {
 		struct xway_output *out;
 		wl_list_for_each(out, &xwayback->outputs, link) {
