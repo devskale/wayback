@@ -9,6 +9,7 @@
 
 #include <ctype.h>
 #include <dirent.h>
+#include <errno.h>
 #include <getopt.h>
 #include <signal.h>
 #include <stdbool.h>
@@ -68,13 +69,11 @@ int main(int argc, char *argv[])
 	}
 
 	char *xwayback_path = getenv("XWAYBACK_PATH");
-	if (xwayback_path == NULL) {
-		xwayback_path = "Xwayback";
-	}
-
-	if (access(xwayback_path, X_OK) == -1) {
+	if (xwayback_path != NULL && access(xwayback_path, X_OK) == -1) {
 		wayback_log(LOG_ERROR, "Xwayback executable %s not found or not executable", xwayback_path);
 		exit(EXIT_FAILURE);
+	} else {
+		xwayback_path = "Xwayback";
 	}
 
 	int fd[2];
@@ -90,7 +89,7 @@ int main(int argc, char *argv[])
 		char *fd_str;
 		asprintf(&fd_str, "%d", fd[1]);
 		execlp(xwayback_path, xwayback_path, "--displayfd", fd_str, (void *)NULL);
-		wayback_log(LOG_ERROR, "Failed to launch Xwayback");
+		wayback_log(LOG_ERROR, "Failed to launch Xwayback: %s", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
