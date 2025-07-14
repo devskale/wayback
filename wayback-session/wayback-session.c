@@ -68,13 +68,11 @@ int main(int argc, char *argv[])
 	}
 
 	char *xwayback_path = getenv("XWAYBACK_PATH");
-	if (xwayback_path == NULL) {
-		xwayback_path = "Xwayback";
-	}
-
-	if (access(xwayback_path, X_OK) == -1) {
+	if (xwayback_path != NULL && access(xwayback_path, X_OK) == -1) {
 		wayback_log(LOG_ERROR, "Xwayback executable %s not found or not executable", xwayback_path);
 		exit(EXIT_FAILURE);
+	} else {
+		xwayback_path = "Xwayback";
 	}
 
 	int fd[2];
