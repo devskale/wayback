@@ -106,6 +106,7 @@ int main(int argc, char *argv[])
 
 	session_pid = fork();
 	if (session_pid == 0) {
+		unsetenv("WAYLAND_DISPLAY");
 		setenv("XDG_SESSION_TYPE", "x11", true);
 		setenv("DISPLAY", x_display, true);
 		if (xinitrc_path != NULL) {
