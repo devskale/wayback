@@ -103,8 +103,6 @@ struct tinywl_toplevel
 	struct wl_listener unmap;
 	struct wl_listener commit;
 	struct wl_listener destroy;
-	struct wl_listener request_move;
-	struct wl_listener request_resize;
 	struct wl_listener request_maximize;
 	struct wl_listener request_fullscreen;
 };
@@ -631,8 +629,6 @@ static void xdg_toplevel_destroy(struct wl_listener *listener, void *data)
 	wl_list_remove(&toplevel->unmap.link);
 	wl_list_remove(&toplevel->commit.link);
 	wl_list_remove(&toplevel->destroy.link);
-	wl_list_remove(&toplevel->request_move.link);
-	wl_list_remove(&toplevel->request_resize.link);
 	wl_list_remove(&toplevel->request_maximize.link);
 	wl_list_remove(&toplevel->request_fullscreen.link);
 
