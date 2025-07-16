@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 		wayback_log(LOG_INFO, "Launching with fd %d", fd[1]);
 		char *fd_str;
 		asprintf(&fd_str, "%d", fd[1]);
-		execlp(xwayback_path, xwayback_path, "--displayfd", fd_str, (void *)NULL);
+		execlp(xwayback_path, xwayback_path, "-displayfd", fd_str, (void *)NULL);
 		wayback_log(LOG_ERROR, "Failed to launch Xwayback: %s", strerror(errno));
 		exit(EXIT_FAILURE);
 	}

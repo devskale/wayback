@@ -247,10 +247,12 @@ static const char *basename_c(const char *path)
 	return slash ? ++slash : path;
 }
 
-__attribute__((noreturn)) static void usage(char *binname)
+static void usage(char *binname)
 {
-	fprintf(stderr, "usage: %s [-d :display]\n", binname);
-	exit(EXIT_SUCCESS);
+	fprintf(stderr, "usage: %s [:display] [option]\n", binname);
+	fprintf(
+		stderr,
+		"-displayfd fd		file descriptor to write display number to when ready to connect\n");
 }
 
 int main(int argc, char *argv[])
@@ -260,32 +262,30 @@ int main(int argc, char *argv[])
 	int socket_xwayland[2];
 	const char *x_display = ":0";
 	char *displayfd = NULL;
-	int opt;
 
 	signal(SIGCHLD, handle_child_exit);
 	signal(SIGSEGV, handle_segv);
 	signal(SIGTERM, handle_exit);
 
-	// TODO: Implement all options from Xserver(1) and Xorg(1)
-	static struct option long_options[] = { { "display", required_argument, 0, 'd' },
-		                                    { "displayfd", required_argument, 0, 'f' },
-		                                    { 0, 0, 0, 0 } };
+	wayback_log_init("Xwayback", LOG_INFO, NULL);
 
-	int option_index = 0;
-	while ((opt = getopt_long_only(argc, argv, "d:f:", long_options, &option_index)) != -1) {
-		switch (opt) {
-			case 'd':
-				x_display = optarg;
-				break;
-			case 'f':
-				displayfd = optarg;
-				break;
-			default:
-				usage(argv[0]);
+	// TODO: Implement all options from Xserver(1) and Xorg(1)
+	int j = 0;
+	for (int i = 1; i < argc; i++) {
+		if (argv[i][0] == ':') {
+			x_display = argv[i];
+		} else if (strcmp(argv[i], "-displayfd") == 0) {
+			if (++i < argc) {
+				displayfd = argv[i];
+			}
+		} else if (strcmp(argv[i], "-help") == 0) {
+			usage(argv[0]);
+			exit(EXIT_SUCCESS);
+		} else {
+			argv[j++] = argv[i];
 		}
 	}
-
-	wayback_log_init("Xwayback", LOG_INFO, NULL);
+	argc = j;
 
 	// displayfd takes priority
 	// TODO: Check if this is also the case in Xserver(7)
