@@ -287,10 +287,6 @@ int main(int argc, char *argv[])
 
 	wayback_log_init("Xwayback", LOG_INFO, NULL);
 
-	if (unsetenv("WAYLAND_DISPLAY") == -1)
-		// not the end of the world if it couldn't be unset
-		wayback_log(LOG_WARN, "Could not unset WAYLAND_DISPLAY");
-
 	// displayfd takes priority
 	// TODO: Check if this is also the case in Xserver(7)
 	if (displayfd != NULL) {
@@ -349,6 +345,10 @@ int main(int argc, char *argv[])
 
 	close(socket_xwayback[0]);
 	close(socket_xwayland[0]);
+
+	if (unsetenv("WAYLAND_DISPLAY") == -1)
+		// not the end of the world if it couldn't be unset
+		wayback_log(LOG_WARN, "Could not unset WAYLAND_DISPLAY");
 
 	char way_display[1024];
 	snprintf(way_display, sizeof(way_display), "%d", socket_xwayback[1]);
