@@ -241,10 +241,22 @@ void handle_segv(int sig)
 	handle_exit(sig);
 }
 
-static const char *basename_c(const char *path)
+char **merge_args(char **args1, int args1_len, char **args2, int args2_len)
 {
-	const char *slash = strrchr(path, '/');
-	return slash ? ++slash : path;
+	char **result = malloc(sizeof(char *) * (args1_len + args2_len + 1));
+	if (!result)
+		return NULL;
+
+	for (int i = 0; i < args1_len; i++) {
+		result[i] = args1[i];
+	}
+
+	for (int i = 0; i < args2_len; i++) {
+		result[args1_len + i] = args2[i];
+	}
+
+	result[args1_len + args2_len] = NULL;
+	return result;
 }
 
 static void usage(char *binname)
@@ -399,27 +411,18 @@ int main(int argc, char *argv[])
 		         xwayback->first_output->width,
 		         xwayback->first_output->height);
 
-		if (x_display)
-			execl(xwayland_path,
-			      basename_c(xwayland_path),
-			      x_display,
-			      "-fullscreen",
-			      "-retro",
-			      "-terminate",
-			      "-geometry",
-			      geometry,
-			      (void *)NULL);
-		else {
-			execl(xwayland_path,
-			      basename_c(xwayland_path),
-			      "-displayfd",
-			      displayfd,
-			      "-fullscreen",
-			      "-retro",
-			      "-terminate",
-			      "-geometry",
-			      geometry,
-			      (void *)NULL);
+		if (x_display) {
+			char *base_args[] = { xwayland_path, x_display,   "-fullscreen",
+				                  "-terminate",  "-geometry", geometry };
+			int base_argc = 6;
+			char **xwayland_argv = merge_args(base_args, base_argc, argv, argc);
+			execv(xwayland_path, xwayland_argv);
+		} else {
+			char *base_args[] = { xwayland_path, "-displayfd", displayfd,   "-fullscreen",
+				                  "-retro",      "-terminate", "-geometry", geometry };
+			int base_argc = 8;
+			char **xwayland_argv = merge_args(base_args, base_argc, argv, argc);
+			execv(xwayland_path, xwayland_argv);
 		}
 		wayback_log(LOG_ERROR, "Failed to launch Xwayland");
 		exit(EXIT_FAILURE);
