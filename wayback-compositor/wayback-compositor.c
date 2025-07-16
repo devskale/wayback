@@ -148,7 +148,7 @@ static bool handle_keybinding(struct tinywl_server *server, xkb_keysym_t sym)
 	 * processing keys, rather than passing them on to the client for its own
 	 * processing.
 	 *
-	 * This function assumes Alt is held down.
+	 * This function assumes Ctrl and Alt are held down.
 	 */
 	if (sym == XKB_KEY_BackSpace) {
 		wl_display_terminate(server->wl_display);
@@ -185,6 +185,8 @@ static void keyboard_handle_key(struct wl_listener *listener, void *data)
 		 * process it as a compositor keybinding. */
 		for (int i = 0; i < nsyms; i++) {
 			handled = handle_keybinding(server, syms[i]);
+			if (handled)
+				break;
 		}
 	}
 
