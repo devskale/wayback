@@ -241,16 +241,30 @@ void handle_segv(int sig)
 	handle_exit(sig);
 }
 
-static const char *basename_c(const char *path)
+char **merge_args(char **args1, int args1_len, char **args2, int args2_len)
 {
-	const char *slash = strrchr(path, '/');
-	return slash ? ++slash : path;
+	char **result = malloc(sizeof(char *) * (args1_len + args2_len + 1));
+	if (!result)
+		return NULL;
+
+	for (int i = 0; i < args1_len; i++) {
+		result[i] = args1[i];
+	}
+
+	for (int i = 0; i < args2_len; i++) {
+		result[args1_len + i] = args2[i];
+	}
+
+	result[args1_len + args2_len] = NULL;
+	return result;
 }
 
-__attribute__((noreturn)) static void usage(char *binname)
+static void usage(char *binname)
 {
-	fprintf(stderr, "usage: %s [-d :display]\n", binname);
-	exit(EXIT_SUCCESS);
+	fprintf(stderr, "usage: %s [:display] [option]\n", binname);
+	fprintf(
+		stderr,
+		"-displayfd fd		file descriptor to write display number to when ready to connect\n");
 }
 
 int main(int argc, char *argv[])
@@ -260,32 +274,30 @@ int main(int argc, char *argv[])
 	int socket_xwayland[2];
 	const char *x_display = ":0";
 	char *displayfd = NULL;
-	int opt;
 
 	signal(SIGCHLD, handle_child_exit);
 	signal(SIGSEGV, handle_segv);
 	signal(SIGTERM, handle_exit);
 
-	// TODO: Implement all options from Xserver(1) and Xorg(1)
-	static struct option long_options[] = { { "display", required_argument, 0, 'd' },
-		                                    { "displayfd", required_argument, 0, 'f' },
-		                                    { 0, 0, 0, 0 } };
+	wayback_log_init("Xwayback", LOG_INFO, NULL);
 
-	int option_index = 0;
-	while ((opt = getopt_long_only(argc, argv, "d:f:", long_options, &option_index)) != -1) {
-		switch (opt) {
-			case 'd':
-				x_display = optarg;
-				break;
-			case 'f':
-				displayfd = optarg;
-				break;
-			default:
-				usage(argv[0]);
+	// TODO: Implement all options from Xserver(1) and Xorg(1)
+	int j = 0;
+	for (int i = 1; i < argc; i++) {
+		if (argv[i][0] == ':') {
+			x_display = argv[i];
+		} else if (strcmp(argv[i], "-displayfd") == 0) {
+			if (++i < argc) {
+				displayfd = argv[i];
+			}
+		} else if (strcmp(argv[i], "-help") == 0) {
+			usage(argv[0]);
+			exit(EXIT_SUCCESS);
+		} else {
+			argv[j++] = argv[i];
 		}
 	}
-
-	wayback_log_init("Xwayback", LOG_INFO, NULL);
+	argc = j;
 
 	// displayfd takes priority
 	// TODO: Check if this is also the case in Xserver(7)
@@ -399,27 +411,18 @@ int main(int argc, char *argv[])
 		         xwayback->first_output->width,
 		         xwayback->first_output->height);
 
-		if (x_display)
-			execl(xwayland_path,
-			      basename_c(xwayland_path),
-			      x_display,
-			      "-fullscreen",
-			      "-retro",
-			      "-terminate",
-			      "-geometry",
-			      geometry,
-			      (void *)NULL);
-		else {
-			execl(xwayland_path,
-			      basename_c(xwayland_path),
-			      "-displayfd",
-			      displayfd,
-			      "-fullscreen",
-			      "-retro",
-			      "-terminate",
-			      "-geometry",
-			      geometry,
-			      (void *)NULL);
+		if (x_display) {
+			char *base_args[] = { xwayland_path, x_display,   "-fullscreen",
+				                  "-terminate",  "-geometry", geometry };
+			int base_argc = 6;
+			char **xwayland_argv = merge_args(base_args, base_argc, argv, argc);
+			execv(xwayland_path, xwayland_argv);
+		} else {
+			char *base_args[] = { xwayland_path, "-displayfd", displayfd,   "-fullscreen",
+				                  "-retro",      "-terminate", "-geometry", geometry };
+			int base_argc = 8;
+			char **xwayland_argv = merge_args(base_args, base_argc, argv, argc);
+			execv(xwayland_path, xwayland_argv);
 		}
 		wayback_log(LOG_ERROR, "Failed to launch Xwayland");
 		exit(EXIT_FAILURE);
