@@ -57,8 +57,8 @@ struct xway_output
 	float refresh;
 };
 
-pid_t comp_pid;
-pid_t xway_pid;
+static pid_t comp_pid;
+static pid_t xway_pid;
 
 static void output_geometry(void *data,
                             struct wl_output *wl_output,
@@ -211,7 +211,7 @@ static const struct wl_registry_listener registry_listener = {
 	.global_remove = NULL, // TODO: handle_global_remove
 };
 
-void handle_child_exit(int sig)
+static void handle_child_exit(int sig)
 {
 	pid_t pid = waitpid(-1, NULL, WNOHANG);
 	if (pid == comp_pid || pid == xway_pid) {
@@ -223,13 +223,13 @@ void handle_child_exit(int sig)
 	}
 }
 
-void handle_exit(int sig)
+static void handle_exit(int sig)
 {
 	kill(xway_pid, SIGTERM);
 	kill(comp_pid, SIGTERM);
 }
 
-void handle_segv(int sig)
+static void handle_segv(int sig)
 {
 	const char *errormsg =
 		"[ERROR] (Xwayback): Received SIGSEGV (Segmentation fault)!\n"
@@ -307,8 +307,8 @@ int main(int argc, char *argv[])
 	}
 
 	// check if the compositor/Xwayland binaries are accessible before doing anything else
-	char *wayback_compositor_path = getenv("WAYBACK_COMPOSITOR_PATH");
-	char *xwayland_path = getenv("XWAYLAND_PATH");
+	const char *wayback_compositor_path = getenv("WAYBACK_COMPOSITOR_PATH");
+	const char *xwayland_path = getenv("XWAYLAND_PATH");
 	if (wayback_compositor_path == NULL)
 		wayback_compositor_path = WAYBACK_COMPOSITOR_EXEC_PATH;
 	if (xwayland_path == NULL)
@@ -382,7 +382,7 @@ int main(int argc, char *argv[])
 	wl_display_roundtrip(xwayback->display);
 	wl_display_roundtrip(xwayback->display); // xdg-output requires two roundtrips
 
-	char *output = getenv("WAYBACK_OUTPUT");
+	const char *output = getenv("WAYBACK_OUTPUT");
 	if (output != NULL) {
 		struct xway_output *out;
 		wl_list_for_each(out, &xwayback->outputs, link) {
