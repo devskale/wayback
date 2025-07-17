@@ -6,6 +6,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include "utils.h"
 #include "wayback_log.h"
 #include "xdg-output-unstable-v1-client-protocol.h"
 
@@ -78,8 +79,8 @@ static void output_geometry(void *data,
 
 	output->physical_height = height_mm;
 	output->physical_width = width_mm;
-	output->make = make != NULL ? strdup(make) : NULL;
-	output->model = model != NULL ? strdup(model) : NULL;
+	output->make = make != NULL ? strdup_or_exit(make) : NULL;
+	output->model = model != NULL ? strdup_or_exit(model) : NULL;
 	output->subpixel = subpixel;
 	output->transform = transform;
 	return;
@@ -149,7 +150,7 @@ static void xdg_output_handle_name(void *data, struct zxdg_output_v1 *xdg_output
 {
 	struct xway_output *output = data;
 	free(output->name);
-	output->name = strdup(name);
+	output->name = strdup_or_exit(name);
 }
 
 static void xdg_output_handle_description(void *data,
@@ -158,7 +159,7 @@ static void xdg_output_handle_description(void *data,
 {
 	struct xway_output *output = data;
 	free(output->description);
-	output->description = strdup(description);
+	output->description = strdup_or_exit(description);
 }
 
 static const struct zxdg_output_v1_listener xdg_output_listener = {
@@ -367,7 +368,7 @@ int main(int argc, char *argv[])
 	setenv("WAYLAND_SOCKET", way_display, true);
 
 	if (x_display)
-		xwayback->X_display = strdup(x_display);
+		xwayback->X_display = strdup_or_exit(x_display);
 
 	xwayback->display = wl_display_connect(NULL);
 	if (!xwayback->display) {
@@ -387,7 +388,7 @@ int main(int argc, char *argv[])
 		struct xway_output *out;
 		wl_list_for_each(out, &xwayback->outputs, link) {
 			char *output_make_model;
-			asprintf(&output_make_model, "%s %s", out->make, out->model);
+			asprintf_or_exit(&output_make_model, "%s %s", out->make, out->model);
 			if (strcmp(output_make_model, output) == 0 || strcmp(out->make, output) == 0)
 				xwayback->first_output = out;
 		}
