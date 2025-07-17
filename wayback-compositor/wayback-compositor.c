@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include "wayback_log.h"
+
 #include <assert.h>
 #include <fcntl.h>
 #include <getopt.h>
@@ -753,9 +755,27 @@ int set_cloexec(int fd)
 	return fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
 }
 
+static void wayback_wlr_vlog(enum wayback_log_level verbosity, const char *fmt, va_list args)
+{
+	static const enum wlr_log_importance importance_map[LOG_LAST] = {
+		[LOG_ERROR] = WLR_ERROR,
+		[LOG_WARN] = WLR_INFO, // There is no WLR_WARN
+		[LOG_INFO] = WLR_INFO,
+		[LOG_DEBUG] = WLR_DEBUG,
+	};
+
+	enum wayback_log_level verbosity_clamped = verbosity < LOG_LAST ? verbosity : LOG_LAST - 1;
+	enum wlr_log_importance importance = importance_map[verbosity_clamped];
+
+	// Not wlr_vlog here because we don't need file and line number. It will just point back here
+	// anyway.
+	_wlr_vlog(importance, fmt, args);
+}
+
 int main(int argc, char *argv[])
 {
 	wlr_log_init(WLR_DEBUG, NULL);
+	wayback_log_init("wayback-compositor", LOG_INFO, wayback_wlr_vlog);
 
 	if (argc < 3) {
 		fprintf(stderr, "Usage: %s <socket xwayback> <socket xwayland>\n", argv[0]);
