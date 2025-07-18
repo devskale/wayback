@@ -356,11 +356,7 @@ int main(int argc, char *argv[])
 
 	unsetenv("WAYLAND_DISPLAY");
 
-	char way_display[1024];
-	snprintf(way_display, sizeof(way_display), "%d", socket_xwayback[1]);
-	setenv("WAYLAND_SOCKET", way_display, true);
-
-	xwayback->display = wl_display_connect(NULL);
+	xwayback->display = wl_display_connect_to_fd(socket_xwayback[1]);
 	if (!xwayback->display) {
 		wayback_log(LOG_ERROR, "Unable to connect to wayback-compositor");
 		exit(EXIT_FAILURE);
