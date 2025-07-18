@@ -26,12 +26,7 @@
 struct xwayback
 {
 	struct wl_display *display;
-
-	char *wayland_socket;
-	char *X_display;
-
 	struct zxdg_output_manager_v1 *xdg_output_manager;
-
 	struct xway_output *first_output;
 	struct wl_list outputs;
 };
@@ -366,9 +361,6 @@ int main(int argc, char *argv[])
 	char way_display[1024];
 	snprintf(way_display, sizeof(way_display), "%d", socket_xwayback[1]);
 	setenv("WAYLAND_SOCKET", way_display, true);
-
-	if (x_display)
-		xwayback->X_display = strdup_or_exit(x_display);
 
 	xwayback->display = wl_display_connect(NULL);
 	if (!xwayback->display) {
