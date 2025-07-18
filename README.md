@@ -15,6 +15,8 @@ if you are able.
 ## Installation
 
 Dependencies:
+- C compiler supporting the C23 standard (e.g. gcc >= 14 or clang >= 18)
+- meson >= 1.4.0
 - wayland (wayland-server, wayland-client, wayland-cursor, wayland-egl)
 - wayland-protocol >=1.14
 - xkbcommon
