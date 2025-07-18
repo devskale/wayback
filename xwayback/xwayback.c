@@ -355,6 +355,7 @@ int main(int argc, char *argv[])
 	close(socket_xwayland[0]);
 
 	unsetenv("WAYLAND_DISPLAY");
+	unsetenv("WAYLAND_SOCKET");
 
 	xwayback->display = wl_display_connect_to_fd(socket_xwayback[1]);
 	if (!xwayback->display) {
