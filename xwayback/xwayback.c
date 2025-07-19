@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <signal.h>
+#include <spawn.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -237,6 +238,8 @@ static void handle_segv(int sig)
 	handle_exit(sig);
 }
 
+extern char **environ;
+
 int main(int argc, char *argv[])
 {
 	struct xwayback *xwayback = malloc(sizeof(struct xwayback));
@@ -287,25 +290,27 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	comp_pid = fork();
-	if (comp_pid == 0) {
-		char fd_xwayback[64];
-		char fd_xwayland[64];
-		snprintf(fd_xwayback, sizeof(fd_xwayback), "%d", socket_xwayback[0]);
-		snprintf(fd_xwayland, sizeof(fd_xwayland), "%d", socket_xwayland[0]);
+	posix_spawn_file_actions_t file_actions;
+	posix_spawn_file_actions_init(&file_actions);
+	posix_spawn_file_actions_addclose(&file_actions, socket_xwayback[1]);
+	posix_spawn_file_actions_addclose(&file_actions, socket_xwayland[1]);
 
-		wayback_log(
-			LOG_INFO, "Passed descriptor Xwayback: %s; Xwayland %s", fd_xwayback, fd_xwayland);
-		close(socket_xwayback[1]);
-		close(socket_xwayland[1]);
-		execlp(wayback_compositor_path,
-		       wayback_compositor_path,
-		       fd_xwayback,
-		       fd_xwayland,
-		       (void *)NULL);
+	char fd_xwayback[64];
+	char fd_xwayland[64];
+	snprintf(fd_xwayback, sizeof(fd_xwayback), "%d", socket_xwayback[0]);
+	snprintf(fd_xwayland, sizeof(fd_xwayland), "%d", socket_xwayland[0]);
+
+	if (posix_spawn(&comp_pid,
+	                wayback_compositor_path,
+	                &file_actions,
+	                NULL,
+	                (char *[]){ (char *)wayback_compositor_path, fd_xwayback, fd_xwayland, NULL },
+	                environ) != 0) {
 		wayback_log(LOG_ERROR, "Failed to launch wayback-compositor: %s", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
+
+	posix_spawn_file_actions_destroy(&file_actions);
 
 	close(socket_xwayback[0]);
 	close(socket_xwayland[0]);
@@ -343,37 +348,36 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	xway_pid = fork();
-	if (xway_pid == 0) {
-		char way_display[64];
-		snprintf(way_display, sizeof(way_display), "%d", socket_xwayland[1]);
-		setenv("WAYLAND_SOCKET", way_display, true);
+	char way_display[64];
+	snprintf(way_display, sizeof(way_display), "%d", socket_xwayland[1]);
+	setenv("WAYLAND_SOCKET", way_display, true);
 
-		char geometry[4096] = "";
-		const char *xwayback_args[] = {
-			"-fullscreen",
-			"-terminate",
-			"-geometry",
-			geometry,
-		};
+	char geometry[4096] = "";
+	const char *xwayback_args[] = {
+		"-fullscreen",
+		"-terminate",
+		"-geometry",
+		geometry,
+	};
 
-		snprintf(geometry,
-				 sizeof(geometry),
-				 "%dx%d",
-				 xwayback->first_output->width,
-				 xwayback->first_output->height);
+	snprintf(geometry,
+	         sizeof(geometry),
+	         "%dx%d",
+	         xwayback->first_output->width,
+	         xwayback->first_output->height);
 
-		size_t count = 0;
-		const char *arguments[argc + ARRAY_SIZE(xwayback_args) + 1];
-		arguments[count++] = xwayland_path;
-		for (size_t i = 0; i < ARRAY_SIZE(xwayback_args); i++)
-			arguments[count++] = xwayback_args[i];
-		for (int i = 1; i < argc; i++)
-			arguments[count++] = argv[i];
-		arguments[count++] = NULL;
+	size_t count = 0;
+	const char *arguments[argc + ARRAY_SIZE(xwayback_args) + 1];
+	arguments[count++] = xwayland_path;
+	for (size_t i = 0; i < ARRAY_SIZE(xwayback_args); i++)
+		arguments[count++] = xwayback_args[i];
+	for (int i = 1; i < argc; i++)
+		arguments[count++] = argv[i];
+	arguments[count++] = NULL;
 
-		execv(xwayland_path, (char **)arguments);
+	if (posix_spawn(&xway_pid, xwayland_path, NULL, NULL, (char **)arguments, environ) != 0) {
 		wayback_log(LOG_ERROR, "Failed to launch Xwayland");
+		kill(comp_pid, SIGTERM);
 		exit(EXIT_FAILURE);
 	}
 
