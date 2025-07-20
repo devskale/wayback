@@ -6,6 +6,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include "optparse.h"
 #include "utils.h"
 #include "wayback_log.h"
 #include "xdg-output-unstable-v1-client-protocol.h"
@@ -243,6 +244,10 @@ extern char **environ;
 int main(int argc, char *argv[])
 {
 	struct xwayback *xwayback = malloc(sizeof(struct xwayback));
+	const struct optcmd opts[] = {
+		/* options handled by Xwayback */
+		{ .name = "-help", .description = "show help page", .req_operand = false, .ignore = false },
+	};
 	int socket_xwayback[2];
 	int socket_xwayland[2];
 
@@ -251,6 +256,28 @@ int main(int argc, char *argv[])
 	signal(SIGTERM, handle_exit);
 
 	wayback_log_init("Xwayback", LOG_INFO, NULL);
+
+	int cur_opt = 0;
+	while (cur_opt = optparse(argc, argv, opts, ARRAY_SIZE(opts)), cur_opt != -1) {
+		/* help message */
+		if (strcmp(argv[cur_opt], "-help") == 0) {
+			fprintf(stderr, "use: %s [:<display>] [option]\n", argv[0]);
+			for (size_t j = 0; j < ARRAY_SIZE(opts); j++) {
+				if (!opts[j].ignore) {
+					fprintf(stderr,
+					        "%s%s  %s\n",
+					        opts[j].name,
+					        opts[j].req_operand ? " opt" : "",
+					        opts[j].description);
+				}
+			}
+			exit(EXIT_SUCCESS);
+		}
+	}
+
+	if ((argc - optind) <= 0) {
+		wayback_log(LOG_ERROR, "Argument count is <= 0");
+	}
 
 	// check if the compositor/Xwayland binaries are accessible before doing anything else
 	const char *wayback_compositor_path = getenv("WAYBACK_COMPOSITOR_PATH");
@@ -270,14 +297,6 @@ int main(int argc, char *argv[])
 	if (access(xwayland_path, X_OK) == -1) {
 		wayback_log(LOG_ERROR, "Xwayland executable %s not found or not executable", xwayland_path);
 		exit(EXIT_FAILURE);
-	}
-
-	for (int i = 1; i < argc; i++) {
-		/* minimal help for now */
-		if (strcmp(argv[i], "-help") == 0) {
-			fprintf(stderr, "%s [options ...]\n", argv[0]);
-			exit(EXIT_SUCCESS);
-		}
 	}
 
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, socket_xwayback) == -1) {
