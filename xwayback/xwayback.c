@@ -386,12 +386,25 @@ int main(int argc, char *argv[])
 	         xwayback->first_output->height);
 
 	size_t count = 0;
-	const char *arguments[argc + ARRAY_SIZE(xwayback_args) + 1];
+	const char *arguments[argc - optind + ARRAY_SIZE(xwayback_args) + 1];
 	arguments[count++] = xwayland_path;
 	for (size_t i = 0; i < ARRAY_SIZE(xwayback_args); i++)
 		arguments[count++] = xwayback_args[i];
-	for (int i = 1; i < argc; i++)
-		arguments[count++] = argv[i];
+	for (int i = 1; i < argc; i++) {
+		size_t j = 0;
+		for (; j < ARRAY_SIZE(opts); j++) {
+			if (strcmp(opts[j].name, argv[i]) == 0) {
+				if (opts[j].req_operand && (i + 1) < argc) {
+					i++;
+				}
+				break;
+			}
+		}
+		if (j == ARRAY_SIZE(opts)) {
+			arguments[count++] = argv[i];
+		}
+	}
+
 	arguments[count++] = NULL;
 
 	if (posix_spawn(&xway_pid, xwayland_path, NULL, NULL, (char **)arguments, environ) != 0) {
