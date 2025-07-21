@@ -261,14 +261,14 @@ int main(int argc, char *argv[])
 	while (cur_opt = optparse(argc, argv, opts, ARRAY_SIZE(opts)), cur_opt != -1) {
 		/* help message */
 		if (strcmp(argv[cur_opt], "-help") == 0) {
-			fprintf(stderr, "use: %s [:<display>] [option]\n", argv[0]);
+			wayback_log(LOG_INFO, "Usage: %s [:<display>] [option]\n", argv[0]);
 			for (size_t j = 0; j < ARRAY_SIZE(opts); j++) {
 				if (!opts[j].ignore) {
-					fprintf(stderr,
-					        "%s%s  %s\n",
-					        opts[j].name,
-					        opts[j].req_operand ? " opt" : "",
-					        opts[j].description);
+					wayback_log(LOG_INFO,
+					            "\t%s%s\t\t %s",
+					            opts[j].name,
+					            opts[j].req_operand ? " opt" : "",
+					            opts[j].description);
 				}
 			}
 			exit(EXIT_SUCCESS);
