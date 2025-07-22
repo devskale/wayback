@@ -52,6 +52,7 @@ are still applicable to the latest code.***
 - Arch Linux: [`wayback-x11-git`][aur-pkg] in the AUR
 - Fedora Linux: [`wayback`][fedora-pkg]
 - Gentoo GURU: [`gui-wm/wayback`][gentoo-guru]
+- Nixpkgs: [`wayback-x11`][nixpkgs-pkg]
 - T2 SDE: [`wayback`][t2sde-pkg]
 
 <!-- Keep sorted by link identifier, and then same order above -->
@@ -61,6 +62,7 @@ are still applicable to the latest code.***
 [aur-pkg]: https://aur.archlinux.org/packages/wayback-x11-git
 [fedora-pkg]: https://src.fedoraproject.org/rpms/wayback
 [gentoo-guru]: https://wiki.gentoo.org/wiki/Project:GURU/Information_for_End_Users
+[nixpkgs-pkg]: https://search.nixos.org/packages?channel=unstable&show=wayback-x11
 [t2sde-pkg]: https://t2sde.org/packages/wayback
 
 ## Discussion
