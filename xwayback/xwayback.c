@@ -354,10 +354,7 @@ int main(int argc, char *argv[])
 
 	char geometry[4096] = "";
 	const char *xwayback_args[] = {
-		"-fullscreen",
-		"-terminate",
-		"-geometry",
-		geometry,
+		"-fullscreen", "-terminate", "3", "-geometry", geometry,
 	};
 
 	snprintf(geometry,
