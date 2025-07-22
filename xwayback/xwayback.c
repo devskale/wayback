@@ -247,6 +247,64 @@ int main(int argc, char *argv[])
 	const struct optcmd opts[] = {
 		/* options handled by Xwayback */
 		{ .name = "-help", .description = "show help page", .req_operand = false, .ignore = false },
+		{ .name = "-showconfig",
+		  .description = "alias to -version",
+		  .req_operand = false,
+		  .ignore = false },
+		{ .name = "-version",
+		  .description = "show Xwayback version",
+		  .req_operand = false,
+		  .ignore = false },
+
+		/* ignored options */
+		IGNORE_OPT("-decorate", false),
+		IGNORE_OPT("-enable‐ei‐portal", false),
+		IGNORE_OPT("-fullscreen", false),
+		IGNORE_OPT("-geometry", true),
+		IGNORE_OPT("-glamor", true),
+		IGNORE_OPT("-hidpi", false),
+		IGNORE_OPT("-host‐grab", false),
+		IGNORE_OPT("-noTouchPointerEmulation", false),
+		IGNORE_OPT("-force‐xrandr‐emulation", false),
+		IGNORE_OPT("-nokeymap", false),
+		IGNORE_OPT("-rootless", false),
+		IGNORE_OPT("-shm", false),
+		IGNORE_OPT("-wm", true),
+
+		/* Xorg(1)-specific options */
+		IGNORE_OPT("-allowMouseOpenFail", false),
+		IGNORE_OPT("-allowNonLocalXvidtune", false),
+		IGNORE_OPT("-bgamma", true),
+		IGNORE_OPT("-bpp", true), /* no longer supported by upstream Xorg(1) */
+		IGNORE_OPT("-config", true),
+		IGNORE_OPT("-configdir", true),
+		IGNORE_OPT("-configure", true),
+		IGNORE_OPT("-crt", true),
+		IGNORE_OPT("-depth", true),
+		IGNORE_OPT("-disableVidMode", false),
+		IGNORE_OPT("-fbbbp", true),
+		IGNORE_OPT("-gamma", true),
+		IGNORE_OPT("-ggamma", true),
+		IGNORE_OPT("-ignoreABI", false),
+		IGNORE_OPT("-isolateDevice", true),
+		IGNORE_OPT("-keeptty", false),
+		IGNORE_OPT("-keyboard", true),
+		IGNORE_OPT("-layout", true),
+		IGNORE_OPT("-logverbose", true),
+		IGNORE_OPT("-modulepath", true),
+		IGNORE_OPT("-noautoBindCPU", false),
+		IGNORE_OPT("-nosilk", false),
+		IGNORE_OPT("-novtswitch", false),
+		IGNORE_OPT("-pointer", true),
+		IGNORE_OPT("-quiet", false),
+		IGNORE_OPT("-rgamma", true),
+		IGNORE_OPT("-sharevts", false),
+		IGNORE_OPT("-screen", true),
+		IGNORE_OPT("-showDefaultModulePath", false),
+		IGNORE_OPT("-showDefaultLibPath", false),
+		IGNORE_OPT("-showopts", false),
+		IGNORE_OPT("-weight", true),
+		IGNORE_OPT("-verbose", true),
 	};
 	int socket_xwayback[2];
 	int socket_xwayland[2];
@@ -261,7 +319,12 @@ int main(int argc, char *argv[])
 	while (cur_opt = optparse(argc, argv, opts, ARRAY_SIZE(opts)), cur_opt != -1) {
 		/* help message */
 		if (strcmp(argv[cur_opt], "-help") == 0) {
-			wayback_log(LOG_INFO, "Usage: %s [:<display>] [option]\n", argv[0]);
+			wayback_log(LOG_INFO,
+			            "Wayback <https://wayback.freedesktop.org/> X.org compatibility layer");
+			wayback_log(
+				LOG_INFO,
+				"Report bugs to <https://gitlab.freedesktop.org/wayback/wayback/-/issues>.");
+			wayback_log(LOG_INFO, "Usage: %s [:<display>] [option]", argv[0]);
 			for (size_t j = 0; j < ARRAY_SIZE(opts); j++) {
 				if (!opts[j].ignore) {
 					wayback_log(LOG_INFO,
@@ -271,6 +334,12 @@ int main(int argc, char *argv[])
 					            opts[j].description);
 				}
 			}
+			exit(EXIT_SUCCESS);
+		} else if (strcmp(argv[cur_opt], "-version") == 0 ||
+		           strcmp(argv[cur_opt], "-showconfig") == 0) {
+			wayback_log(LOG_INFO,
+			            "Wayback <https://wayback.freedesktop.org/> X.org compatibility layer");
+			wayback_log(LOG_INFO, "Alpha-quality release");
 			exit(EXIT_SUCCESS);
 		}
 	}
