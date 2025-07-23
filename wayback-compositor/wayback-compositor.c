@@ -34,7 +34,6 @@
 #include <wlr/types/wlr_scene.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_subcompositor.h>
-#include <wlr/types/wlr_viewporter.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 #include <wlr/types/wlr_xdg_output_v1.h>
 #include <wlr/types/wlr_xdg_shell.h>
@@ -58,8 +57,6 @@ struct tinywl_server
 	struct wl_list toplevels;
 
 	struct wlr_xdg_output_manager_v1 *xdg_output_manager_v1;
-
-	struct wlr_viewporter *viewporter;
 
 	struct wlr_cursor *cursor;
 	struct wlr_xcursor_manager *cursor_mgr;
@@ -863,9 +860,6 @@ int main(int argc, char *argv[])
 	wl_signal_add(&server.xdg_shell->events.new_toplevel, &server.new_xdg_toplevel);
 	server.new_xdg_popup.notify = server_new_xdg_popup;
 	wl_signal_add(&server.xdg_shell->events.new_popup, &server.new_xdg_popup);
-
-	/* Set up viewporter protocol */
-	server.viewporter = wlr_viewporter_create(server.wl_display);
 
 	/* Set up xdg-output protocol */
 	server.xdg_output_manager_v1 =
