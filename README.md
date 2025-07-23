@@ -50,13 +50,13 @@ are still applicable to the latest code.***
   repository
 - ALT Linux: [`wayback`][alt-pkg]
 - Arch Linux: [`wayback-x11-git`][aur-pkg] in the AUR
-- Fedora, RHEL: [`ngompa/wayback`][copr-pkg] Copr repository
+- Fedora Linux: [`wayback`][fedora-pkg]
 - T2 SDE: [`wayback`][t2sde-pkg]
 
 [alpine-pkg]: https://pkgs.alpinelinux.org/packages?name=wayback*&branch=edge&repo=&arch=&origin=&flagged=&maintainer=
 [alt-pkg]:    https://packages.altlinux.org/en/sisyphus/srpms/wayback/
 [aur-pkg]:    https://aur.archlinux.org/packages/wayback-x11-git
-[copr-pkg]:   https://copr.fedorainfracloud.org/coprs/ngompa/wayback/
+[fedora-pkg]: https://src.fedoraproject.org/rpms/wayback
 [t2sde-pkg]:  https://t2sde.org/packages/wayback
 
 ## Discussion
