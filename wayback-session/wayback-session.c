@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 	if (argc == 1) {
 		xinitrc_path = get_xinitrc_path();
 	} else {
-		session_cmd = &argv[optind];
+		session_cmd = &argv[1];
 	}
 
 	char *xwayback_path = getenv("XWAYBACK_PATH");
