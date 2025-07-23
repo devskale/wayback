@@ -776,7 +776,7 @@ int main(int argc, char *argv[])
 	wayback_log_init("wayback-compositor", LOG_INFO, wayback_wlr_vlog);
 
 	if (argc < 3) {
-		fprintf(stderr, "Usage: %s <socket xwayback> <socket xwayland>\n", argv[0]);
+		wayback_log(LOG_INFO, "Usage: %s <socket xwayback> <socket xwayland>", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 

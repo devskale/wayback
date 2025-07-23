@@ -6,6 +6,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include "optparse.h"
 #include "utils.h"
 #include "wayback_log.h"
 #include "xdg-output-unstable-v1-client-protocol.h"
@@ -243,6 +244,68 @@ extern char **environ;
 int main(int argc, char *argv[])
 {
 	struct xwayback *xwayback = malloc(sizeof(struct xwayback));
+	const struct optcmd opts[] = {
+		/* options handled by Xwayback */
+		{ .name = "-help", .description = "show help page", .req_operand = false, .ignore = false },
+		{ .name = "-showconfig",
+		  .description = "alias to -version",
+		  .req_operand = false,
+		  .ignore = false },
+		{ .name = "-version",
+		  .description = "show Xwayback version",
+		  .req_operand = false,
+		  .ignore = false },
+
+		/* ignored options */
+		IGNORE_OPT("-decorate", false),
+		IGNORE_OPT("-enable‐ei‐portal", false),
+		IGNORE_OPT("-fullscreen", false),
+		IGNORE_OPT("-geometry", true),
+		IGNORE_OPT("-glamor", true),
+		IGNORE_OPT("-hidpi", false),
+		IGNORE_OPT("-host‐grab", false),
+		IGNORE_OPT("-noTouchPointerEmulation", false),
+		IGNORE_OPT("-force‐xrandr‐emulation", false),
+		IGNORE_OPT("-nokeymap", false),
+		IGNORE_OPT("-rootless", false),
+		IGNORE_OPT("-shm", false),
+		IGNORE_OPT("-wm", true),
+
+		/* Xorg(1)-specific options */
+		IGNORE_OPT("-allowMouseOpenFail", false),
+		IGNORE_OPT("-allowNonLocalXvidtune", false),
+		IGNORE_OPT("-bgamma", true),
+		IGNORE_OPT("-bpp", true), /* no longer supported by upstream Xorg(1) */
+		IGNORE_OPT("-config", true),
+		IGNORE_OPT("-configdir", true),
+		IGNORE_OPT("-configure", true),
+		IGNORE_OPT("-crt", true),
+		IGNORE_OPT("-depth", true),
+		IGNORE_OPT("-disableVidMode", false),
+		IGNORE_OPT("-fbbbp", true),
+		IGNORE_OPT("-gamma", true),
+		IGNORE_OPT("-ggamma", true),
+		IGNORE_OPT("-ignoreABI", false),
+		IGNORE_OPT("-isolateDevice", true),
+		IGNORE_OPT("-keeptty", false),
+		IGNORE_OPT("-keyboard", true),
+		IGNORE_OPT("-layout", true),
+		IGNORE_OPT("-logverbose", true),
+		IGNORE_OPT("-modulepath", true),
+		IGNORE_OPT("-noautoBindCPU", false),
+		IGNORE_OPT("-nosilk", false),
+		IGNORE_OPT("-novtswitch", false),
+		IGNORE_OPT("-pointer", true),
+		IGNORE_OPT("-quiet", false),
+		IGNORE_OPT("-rgamma", true),
+		IGNORE_OPT("-sharevts", false),
+		IGNORE_OPT("-screen", true),
+		IGNORE_OPT("-showDefaultModulePath", false),
+		IGNORE_OPT("-showDefaultLibPath", false),
+		IGNORE_OPT("-showopts", false),
+		IGNORE_OPT("-weight", true),
+		IGNORE_OPT("-verbose", true),
+	};
 	int socket_xwayback[2];
 	int socket_xwayland[2];
 
@@ -251,6 +314,39 @@ int main(int argc, char *argv[])
 	signal(SIGTERM, handle_exit);
 
 	wayback_log_init("Xwayback", LOG_INFO, NULL);
+
+	int cur_opt = 0;
+	while (cur_opt = optparse(argc, argv, opts, ARRAY_SIZE(opts)), cur_opt != -1) {
+		/* help message */
+		if (strcmp(argv[cur_opt], "-help") == 0) {
+			wayback_log(LOG_INFO,
+			            "Wayback <https://wayback.freedesktop.org/> X.org compatibility layer");
+			wayback_log(
+				LOG_INFO,
+				"Report bugs to <https://gitlab.freedesktop.org/wayback/wayback/-/issues>.");
+			wayback_log(LOG_INFO, "Usage: %s [:<display>] [option]", argv[0]);
+			for (size_t j = 0; j < ARRAY_SIZE(opts); j++) {
+				if (!opts[j].ignore) {
+					wayback_log(LOG_INFO,
+					            "\t%s%s\t\t %s",
+					            opts[j].name,
+					            opts[j].req_operand ? " opt" : "",
+					            opts[j].description);
+				}
+			}
+			exit(EXIT_SUCCESS);
+		} else if (strcmp(argv[cur_opt], "-version") == 0 ||
+		           strcmp(argv[cur_opt], "-showconfig") == 0) {
+			wayback_log(LOG_INFO,
+			            "Wayback <https://wayback.freedesktop.org/> X.org compatibility layer");
+			wayback_log(LOG_INFO, "Alpha-quality release");
+			exit(EXIT_SUCCESS);
+		}
+	}
+
+	if ((argc - optind) <= 0) {
+		wayback_log(LOG_ERROR, "Argument count is <= 0");
+	}
 
 	// check if the compositor/Xwayland binaries are accessible before doing anything else
 	const char *wayback_compositor_path = getenv("WAYBACK_COMPOSITOR_PATH");
@@ -270,14 +366,6 @@ int main(int argc, char *argv[])
 	if (access(xwayland_path, X_OK) == -1) {
 		wayback_log(LOG_ERROR, "Xwayland executable %s not found or not executable", xwayland_path);
 		exit(EXIT_FAILURE);
-	}
-
-	for (int i = 1; i < argc; i++) {
-		/* minimal help for now */
-		if (strcmp(argv[i], "-help") == 0) {
-			fprintf(stderr, "%s [options ...]\n", argv[0]);
-			exit(EXIT_SUCCESS);
-		}
 	}
 
 	if (socketpair(AF_UNIX, SOCK_STREAM, 0, socket_xwayback) == -1) {
@@ -367,12 +455,25 @@ int main(int argc, char *argv[])
 	         xwayback->first_output->height);
 
 	size_t count = 0;
-	const char *arguments[argc + ARRAY_SIZE(xwayback_args) + 1];
+	const char *arguments[argc - optind + ARRAY_SIZE(xwayback_args) + 1];
 	arguments[count++] = xwayland_path;
 	for (size_t i = 0; i < ARRAY_SIZE(xwayback_args); i++)
 		arguments[count++] = xwayback_args[i];
-	for (int i = 1; i < argc; i++)
-		arguments[count++] = argv[i];
+	for (int i = 1; i < argc; i++) {
+		size_t j = 0;
+		for (; j < ARRAY_SIZE(opts); j++) {
+			if (strcmp(opts[j].name, argv[i]) == 0) {
+				if (opts[j].req_operand && (i + 1) < argc) {
+					i++;
+				}
+				break;
+			}
+		}
+		if (j == ARRAY_SIZE(opts)) {
+			arguments[count++] = argv[i];
+		}
+	}
+
 	arguments[count++] = NULL;
 
 	if (posix_spawn(&xway_pid, xwayland_path, NULL, NULL, (char **)arguments, environ) != 0) {
