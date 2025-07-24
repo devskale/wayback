@@ -209,24 +209,6 @@ static const struct wl_registry_listener registry_listener = {
 	.global_remove = NULL, // TODO: handle_global_remove
 };
 
-static void handle_child_exit(int sig)
-{
-	pid_t pid = waitpid(-1, NULL, WNOHANG);
-	if (pid == comp_pid || pid == xway_pid) {
-		if (pid == comp_pid && xway_pid > 0)
-			kill(xway_pid, SIGTERM);
-		if (pid == xway_pid && comp_pid > 0)
-			kill(comp_pid, SIGTERM);
-		exit(EXIT_SUCCESS);
-	}
-}
-
-static void handle_exit(int sig)
-{
-	kill(xway_pid, SIGTERM);
-	kill(comp_pid, SIGTERM);
-}
-
 static void handle_segv(int sig)
 {
 	const char *errormsg =
@@ -236,11 +218,6 @@ static void handle_segv(int sig)
 		"steps\nto reproduce this error.  If you need assistance, join #wayback on Libera.Chat\nor "
 		"#wayback:catircservices.org on Matrix.\n";
 	write(STDERR_FILENO, errormsg, strlen(errormsg));
-	handle_exit(sig);
-
-	// Reraise signal to crash
-	signal(sig, SIG_DFL);
-	raise(sig);
 }
 
 extern char **environ;
@@ -313,9 +290,7 @@ int main(int argc, char *argv[])
 	int socket_xwayback[2];
 	int socket_xwayland[2];
 
-	signal(SIGCHLD, handle_child_exit);
 	signal(SIGSEGV, handle_segv);
-	signal(SIGTERM, handle_exit);
 
 	wayback_log_init("Xwayback", LOG_INFO, NULL);
 
@@ -480,14 +455,16 @@ int main(int argc, char *argv[])
 
 	arguments[count++] = NULL;
 
-	if (posix_spawn(&xway_pid, xwayland_path, NULL, NULL, (char **)arguments, environ) != 0) {
+	posix_spawn_file_actions_init(&file_actions);
+	posix_spawn_file_actions_addclose(&file_actions, socket_xwayback[1]);
+
+	if (posix_spawn(&xway_pid, xwayland_path, &file_actions, NULL, (char **)arguments, environ) !=
+	    0) {
 		wayback_log(LOG_ERROR, "Failed to launch Xwayland");
-		kill(comp_pid, SIGTERM);
 		exit(EXIT_FAILURE);
 	}
 
-	while (1)
-		pause();
+	waitid(P_PID, comp_pid, NULL, WEXITED);
 
 	return 0;
 }
