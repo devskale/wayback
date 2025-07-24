@@ -237,6 +237,10 @@ static void handle_segv(int sig)
 		"#wayback:catircservices.org on Matrix.\n";
 	write(STDERR_FILENO, errormsg, strlen(errormsg));
 	handle_exit(sig);
+
+	// Reraise signal to crash
+	signal(sig, SIG_DFL);
+	raise(sig);
 }
 
 extern char **environ;
