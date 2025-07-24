@@ -789,6 +789,9 @@ int main(int argc, char *argv[])
 	wayback_log_init("wayback-compositor", LOG_INFO, wayback_wlr_vlog);
 
 	if (argc < 3) {
+		wayback_log(LOG_INFO,
+		            "Wayback <https://wayback.freedesktop.org/> X.Org compatibility layer");
+		wayback_log(LOG_INFO, "Version %s", WAYBACK_VERSION);
 		wayback_log(LOG_INFO, "Usage: %s <socket xwayback> <socket xwayland>", argv[0]);
 		exit(EXIT_FAILURE);
 	}
