@@ -52,12 +52,14 @@ are still applicable to the latest code.***
 - Arch Linux: [`wayback-x11-git`][aur-pkg] in the AUR
 - Fedora Linux: [`wayback`][fedora-pkg]
 - T2 SDE: [`wayback`][t2sde-pkg]
+- Gentoo GURU: [`gui-wm/wayback`][gentoo-guru]
 
 [alpine-pkg]: https://pkgs.alpinelinux.org/packages?name=wayback*&branch=edge&repo=&arch=&origin=&flagged=&maintainer=
 [alt-pkg]:    https://packages.altlinux.org/en/sisyphus/srpms/wayback/
 [aur-pkg]:    https://aur.archlinux.org/packages/wayback-x11-git
 [fedora-pkg]: https://src.fedoraproject.org/rpms/wayback
 [t2sde-pkg]:  https://t2sde.org/packages/wayback
+[gentoo-guru]: https://wiki.gentoo.org/wiki/Project:GURU/Information_for_End_Users
 
 ## Discussion
 
