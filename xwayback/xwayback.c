@@ -318,7 +318,7 @@ int main(int argc, char *argv[])
 		           strcmp(argv[cur_opt], "-showconfig") == 0) {
 			wayback_log(LOG_INFO,
 			            "Wayback <https://wayback.freedesktop.org/> X.org compatibility layer");
-			wayback_log(LOG_INFO, "Alpha-quality release");
+			wayback_log(LOG_INFO, "Version %s", WAYBACK_VERSION);
 			exit(EXIT_SUCCESS);
 		}
 	}

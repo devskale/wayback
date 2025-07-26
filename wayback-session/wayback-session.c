@@ -56,6 +56,8 @@ void handle_child_exit(int sig)
 int main(int argc, char *argv[])
 {
 	wayback_log_init("wayback-session", LOG_INFO, NULL);
+	wayback_log(LOG_INFO, "Wayback <https://wayback.freedesktop.org/> X.Org compatibility layer");
+	wayback_log(LOG_INFO, "Version %s", WAYBACK_VERSION);
 
 	char **session_cmd = NULL;
 	char *xinitrc_path = NULL;
