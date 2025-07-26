@@ -125,6 +125,12 @@ struct tinywl_keyboard
 	struct wl_listener destroy;
 };
 
+struct wayback_client
+{
+	struct tinywl_server *server;
+	struct wl_listener destroy;
+};
+
 static void keyboard_handle_modifiers(struct wl_listener *listener, void *data)
 {
 	/* This event is raised when a modifier key, such as shift or alt, is
@@ -305,6 +311,13 @@ static void seat_request_set_selection(struct wl_listener *listener, void *data)
 	struct tinywl_server *server = wl_container_of(listener, server, request_set_selection);
 	struct wlr_seat_request_set_selection_event *event = data;
 	wlr_seat_set_selection(server->seat, event->source, event->serial);
+}
+
+static void client_destroy(struct wl_listener *listener, void *data)
+{
+	struct wayback_client *client = wl_container_of(listener, client, destroy);
+
+	wl_display_terminate(client->server->wl_display);
 }
 
 static struct tinywl_toplevel *desktop_toplevel_at(struct tinywl_server *server,
@@ -916,16 +929,31 @@ int main(int argc, char *argv[])
 
 	/* Add a Unix socket to the Wayland display. */
 	set_cloexec(xwayback_session_socket);
-	if (!wl_client_create(server.wl_display, xwayback_session_socket)) {
+	struct wl_client *xwayback_client =
+		wl_client_create(server.wl_display, xwayback_session_socket);
+
+	if (!xwayback_client) {
 		wlr_log(WLR_ERROR, "Failed to connect to xwayback client");
 		exit(EXIT_FAILURE);
 	}
 
-	set_cloexec(xwayback_session_socket);
-	if (!wl_client_create(server.wl_display, xwayland_session_socket)) {
+	struct wayback_client xwayback = { 0 };
+	xwayback.server = &server;
+	xwayback.destroy.notify = client_destroy;
+	wl_client_add_destroy_listener(xwayback_client, &xwayback.destroy);
+
+	set_cloexec(xwayland_session_socket);
+	struct wl_client *xwayland_client =
+		wl_client_create(server.wl_display, xwayland_session_socket);
+	if (!xwayland_client) {
 		wlr_log(WLR_ERROR, "Failed to connect to xwayland client");
 		exit(EXIT_FAILURE);
 	}
+
+	struct wayback_client xwayland = { 0 };
+	xwayland.server = &server;
+	xwayland.destroy.notify = client_destroy;
+	wl_client_add_destroy_listener(xwayland_client, &xwayland.destroy);
 
 	/* Start the backend. This will enumerate outputs and inputs, become the DRM
 	 * master, etc */
@@ -977,6 +1005,9 @@ int main(int argc, char *argv[])
 	wl_list_remove(&server.request_set_selection.link);
 
 	wl_list_remove(&server.new_output.link);
+
+	wl_list_remove(&server.new_xdg_toplevel.link);
+	wl_list_remove(&server.new_xdg_popup.link);
 
 	wlr_scene_node_destroy(&server.scene->tree.node);
 	wlr_xcursor_manager_destroy(server.cursor_mgr);
