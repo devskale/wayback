@@ -16,7 +16,7 @@ jobs:
         with:
           # Use a Personal Access Token (PAT) with 'workflow' scope
           # to allow pushing changes, especially if workflows are involved.
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.TOK1 }}
           # Fetch all history for all branches and tags
           fetch-depth: 0
 
