@@ -1,0 +1,86 @@
+stages:
+    - style
+    - build
+
+clang-format:
+    image: quay.io/almalinuxorg/almalinux:10
+    stage: style
+    cache:
+      key: dnf-cache
+      paths:
+        - dnf-cache/
+    script: |
+          dnf --setopt=cachedir=`pwd`/dnf-cache --assumeyes install git-clang-format
+          git clang-format --diff --commit ${CI_MERGE_REQUEST_DIFF_BASE_SHA}
+    only:
+        - merge_requests
+
+alpine:
+    image: docker.io/alpine:edge
+    stage: build
+    script: |
+          apk update
+          apk upgrade
+          apk add \
+            libc-dev \
+            libxkbcommon-dev \
+            gcc \
+            meson \
+            wayland-dev \
+            wayland-protocols \
+            wlroots-dev \
+            xwayland-dev \
+            scdoc
+          meson setup --fatal-meson-warnings builddir/ -Dgenerate_manpages=enabled
+          meson compile -C builddir/ -v
+    only:
+        - branches
+        - merge_requests
+
+arch:
+    image: ghcr.io/archlinux/archlinux:base-devel
+    stage: build
+    cache:
+      key: pacman-cache
+      paths:
+        - pacman-cache/
+    script: |
+          pacman --cachedir=`pwd`/pacman-cache -Syu --needed --noconfirm \
+            libxkbcommon \
+            meson \
+            wayland \
+            wayland-protocols \
+            wlroots0.19 \
+            xorg-xwayland \
+            scdoc
+          meson setup --fatal-meson-warnings builddir/ -Dgenerate_manpages=enabled
+          meson compile -C builddir/ -v
+    only:
+        - branches
+        - merge_requests
+
+fedora:
+    image: quay.io/fedora/fedora:rawhide
+    stage: build
+    cache:
+      key: dnf-cache
+      paths:
+        - dnf-cache/
+    script: |
+          dnf --setopt=cachedir=`pwd`/dnf-cache --assumeyes install \
+            meson \
+            gcc \
+            'pkgconfig(scdoc)' \
+            'pkgconfig(wayland-client)' \
+            'pkgconfig(wayland-cursor)' \
+            'pkgconfig(wayland-egl)' \
+            'pkgconfig(wayland-protocols)' \
+            'pkgconfig(wayland-server)' \
+            'pkgconfig(wlroots-0.19)' \
+            'pkgconfig(xkbcommon)' \
+            'pkgconfig(xwayland)'
+          meson setup --fatal-meson-warnings builddir/ -Dgenerate_manpages=enabled
+          meson compile -C builddir/ -v
+    only:
+        - branches
+        - merge_requests
