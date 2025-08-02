@@ -15,11 +15,13 @@
 #include <string.h>
 #include <unistd.h>
 
-int optind = 0, optpos = 0;
+int optind = 0, optpos = 0, optoper = 0;
 
 int optparse(int argc, char *argv[], const struct optcmd opts[], uint32_t optlen)
 {
 	optpos++;
+	optpos += optoper;
+	optoper = 0;
 	if (optpos >= argc || !argv[optpos]) {
 		return -1;
 	}
@@ -34,7 +36,7 @@ int optparse(int argc, char *argv[], const struct optcmd opts[], uint32_t optlen
 
 			if (opts[i].req_operand) {
 				optind++;
-				optpos++;
+				optoper++;
 			}
 			optind++;
 			break;
