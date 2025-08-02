@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 		/* help message */
 		if (strcmp(argv[cur_opt], "-help") == 0) {
 			wayback_log(LOG_INFO,
-			            "Wayback <https://wayback.freedesktop.org/> X.org compatibility layer");
+			            "Wayback <https://wayback.freedesktop.org/> X.Org compatibility layer");
 			wayback_log(
 				LOG_INFO,
 				"Report bugs to <https://gitlab.freedesktop.org/wayback/wayback/-/issues>.");
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
 		} else if (strcmp(argv[cur_opt], "-version") == 0 ||
 		           strcmp(argv[cur_opt], "-showconfig") == 0) {
 			wayback_log(LOG_INFO,
-			            "Wayback <https://wayback.freedesktop.org/> X.org compatibility layer");
+			            "Wayback <https://wayback.freedesktop.org/> X.Org compatibility layer");
 			wayback_log(LOG_INFO, "Version %s", WAYBACK_VERSION);
 			exit(EXIT_SUCCESS);
 		} else if (strcmp(argv[cur_opt], "-sesscmd") == 0) {
