@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include "optparse.h"
 #include "utils.h"
 #include "wayback_log.h"
 
@@ -56,17 +57,65 @@ void handle_child_exit(int sig)
 int main(int argc, char *argv[])
 {
 	wayback_log_init("wayback-session", LOG_INFO, NULL);
-	wayback_log(LOG_INFO, "Wayback <https://wayback.freedesktop.org/> X.Org compatibility layer");
-	wayback_log(LOG_INFO, "Version %s", WAYBACK_VERSION);
 
 	char **session_cmd = NULL;
 	char *xinitrc_path = NULL;
+	const struct optcmd opts[] = {
+		{ .name = "-help", .description = "show help page", .req_operand = false, .ignore = false },
+		{ .name = "-sesscmd",
+		  .description = "run custom session command",
+		  .req_operand = true,
+		  .ignore = false },
+		{ .name = "-showconfig",
+		  .description = "alias to -version",
+		  .req_operand = false,
+		  .ignore = false },
+		{ .name = "-version",
+		  .description = "show wayback-session version",
+		  .req_operand = false,
+		  .ignore = false },
+	};
 	signal(SIGCHLD, handle_child_exit);
 
-	if (argc == 1) {
+	int cur_opt = 0;
+	while (cur_opt = optparse(argc, argv, opts, ARRAY_SIZE(opts)), cur_opt != -1) {
+		/* help message */
+		if (strcmp(argv[cur_opt], "-help") == 0) {
+			wayback_log(LOG_INFO,
+			            "Wayback <https://wayback.freedesktop.org/> X.Org compatibility layer");
+			wayback_log(
+				LOG_INFO,
+				"Report bugs to <https://gitlab.freedesktop.org/wayback/wayback/-/issues>.");
+			wayback_log(LOG_INFO, "Usage: %s [:<display>] [option]", argv[0]);
+			for (size_t j = 0; j < ARRAY_SIZE(opts); j++) {
+				if (!opts[j].ignore) {
+					wayback_log(LOG_INFO,
+					            "\t%s%s\t\t %s",
+					            opts[j].name,
+					            opts[j].req_operand ? " opt" : "",
+					            opts[j].description);
+				}
+			}
+			exit(EXIT_SUCCESS);
+		} else if (strcmp(argv[cur_opt], "-version") == 0 ||
+		           strcmp(argv[cur_opt], "-showconfig") == 0) {
+			wayback_log(LOG_INFO,
+			            "Wayback <https://wayback.freedesktop.org/> X.Org compatibility layer");
+			wayback_log(LOG_INFO, "Version %s", WAYBACK_VERSION);
+			exit(EXIT_SUCCESS);
+		} else if (strcmp(argv[cur_opt], "-sesscmd") == 0) {
+			session_cmd = &argv[cur_opt + 1];
+		} else {
+			wayback_log(LOG_ERROR, "Unknown option %s", argv[cur_opt]);
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	if ((argc - optind) <= 0) {
+		wayback_log(LOG_ERROR, "Argument count is <= 0");
+	}
+	if (!session_cmd) {
 		xinitrc_path = get_xinitrc_path();
-	} else {
-		session_cmd = &argv[1];
 	}
 
 	char *xwayback_path = getenv("XWAYBACK_PATH");
