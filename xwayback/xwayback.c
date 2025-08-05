@@ -464,6 +464,8 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
+	close(socket_xwayland[1]);
+
 	waitid(P_PID, comp_pid, NULL, WEXITED);
 
 	return 0;
