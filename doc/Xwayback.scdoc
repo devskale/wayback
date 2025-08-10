@@ -6,7 +6,7 @@ Xwayback - experimental X11 compatibility layer
 
 # SYNOPSIS
 
-*Xwayback* _args_
+*Xwayback* :_display_ _args_
 
 # DESCRIPTION
 
@@ -14,8 +14,15 @@ Xwayback - experimental X11 compatibility layer
 
 # OPTIONS
 
-	*-d*, *--display* _<display>_
-		Launch Xwayback on the specified display number
+*Xwayback* accepts all flags *Xorg*(1) accepts.  However, some options are stubs.
+
+Additionally, *Xwayback* supports the following:
+
+	*-help*
+		Show help page
+
+	*-version*, *-showconfig*
+		Show Xwayback version
 
 # ENVVARS
 
@@ -34,4 +41,4 @@ MIT
 
 # SEE ALSO
 
-*wayback-session*(1), *Xserver(1)*, *Xorg(1)*, *Xwayland*(1)
+*wayback-session*(1), *Xserver*(1), *Xorg*(1), *Xwayland*(1)
