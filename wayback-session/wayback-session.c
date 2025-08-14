@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 			wayback_log(
 				LOG_INFO,
 				"Report bugs to <https://gitlab.freedesktop.org/wayback/wayback/-/issues>.");
-			wayback_log(LOG_INFO, "Usage: %s [:<display>] [option]", argv[0]);
+			wayback_log(LOG_INFO, "Usage: %s [option]", argv[0]);
 			for (size_t j = 0; j < ARRAY_SIZE(opts); j++) {
 				if (!opts[j].ignore) {
 					wayback_log(LOG_INFO,
