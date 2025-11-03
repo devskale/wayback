@@ -46,8 +46,7 @@ alpha-quality software and development is rapidly moving, so before reporting an
 issues we ask you to replicate them on the git `main` branch to make sure they
 are still applicable to the latest code.***
 
-- Alpine Linux edge: [`wayback` and `wayback-doc`][alpine-pkg] in the `testing` 
-  repository
+- Alpine Linux: [`wayback`][alpine-pkg] (in `community` repo)
 - ALT Linux: [`wayback`][alt-pkg]
 - Arch Linux: [`wayback-x11-git`][aur-pkg] in the AUR
 - Fedora Linux: [`wayback`][fedora-pkg]
@@ -57,7 +56,7 @@ are still applicable to the latest code.***
 
 <!-- Keep sorted by link identifier, and then same order above -->
 
-[alpine-pkg]: https://pkgs.alpinelinux.org/packages?name=wayback*&branch=edge&repo=&arch=&origin=&flagged=&maintainer=
+[alpine-pkg]: https://gitlab.alpinelinux.org/alpine/aports/-/blob/master/community/wayback
 [alt-pkg]: https://packages.altlinux.org/en/sisyphus/srpms/wayback/
 [aur-pkg]: https://aur.archlinux.org/packages/wayback-x11-git
 [fedora-pkg]: https://src.fedoraproject.org/rpms/wayback
