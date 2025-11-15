@@ -28,7 +28,8 @@ struct optcmd
 	const bool ignore;
 };
 
-#define IGNORE_OPT(s, f) { .name = s, .description = "", .flag = f, .ignore = true }
+#define IGNORE_OPT_DESC(s, f, d) { .name = s, .description = d, .flag = f, .ignore = true }
+#define IGNORE_OPT(s, f) IGNORE_OPT_DESC(s, f, "")
 
 int optparse(int argc, char *argv[], const struct optcmd opts[], uint32_t optlen);
 
