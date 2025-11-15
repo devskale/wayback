@@ -227,13 +227,16 @@ int main(int argc, char *argv[])
 	struct xwayback *xwayback = malloc(sizeof(struct xwayback));
 	const struct optcmd opts[] = {
 		/* options handled by Xwayback */
-		{ .name = "-help", .description = "show help page", .flag = OPT_NOFLAG, .ignore = false },
 		{ .name = "-showconfig",
 		  .description = "alias to -version",
 		  .flag = OPT_NOFLAG,
 		  .ignore = false },
 		{ .name = "-version",
 		  .description = "show Xwayback version",
+		  .flag = OPT_NOFLAG,
+		  .ignore = false },
+		{ .name = "-novtswitch",
+		  .description = "do not switch VTs on startup (default)",
 		  .flag = OPT_NOFLAG,
 		  .ignore = false },
 
@@ -251,6 +254,8 @@ int main(int argc, char *argv[])
 		IGNORE_OPT("-rootless", OPT_NOFLAG),
 		IGNORE_OPT("-shm", OPT_NOFLAG),
 		IGNORE_OPT("-wm", OPT_OPERAND),
+		IGNORE_OPT_DESC(
+			"vt", OPT_NUM, "VT switching is not supported; behaving as if -novtswitch is passed"),
 
 		/* Xorg(1)-specific options */
 		IGNORE_OPT("-allowMouseOpenFail", OPT_NOFLAG),
@@ -295,26 +300,7 @@ int main(int argc, char *argv[])
 
 	int cur_opt = 0;
 	while (cur_opt = optparse(argc, argv, opts, ARRAY_SIZE(opts)), cur_opt != -1) {
-		/* help message */
-		if (strcmp(argv[cur_opt], "-help") == 0) {
-			wayback_log(LOG_INFO,
-			            "Wayback <https://wayback.freedesktop.org/> X.Org compatibility layer");
-			wayback_log(
-				LOG_INFO,
-				"Report bugs to <https://gitlab.freedesktop.org/wayback/wayback/-/issues>.");
-			wayback_log(LOG_INFO, "Usage: %s [:<display>] [option]", argv[0]);
-			for (size_t j = 0; j < ARRAY_SIZE(opts); j++) {
-				if (!opts[j].ignore) {
-					wayback_log(LOG_INFO,
-					            "\t%s%s\t\t %s",
-					            opts[j].name,
-					            opts[j].flag == OPT_OPERAND ? " opt" : "",
-					            opts[j].description);
-				}
-			}
-			exit(EXIT_SUCCESS);
-		} else if (strcmp(argv[cur_opt], "-version") == 0 ||
-		           strcmp(argv[cur_opt], "-showconfig") == 0) {
+		if (strcmp(argv[cur_opt], "-version") == 0 || strcmp(argv[cur_opt], "-showconfig") == 0) {
 			wayback_log(LOG_INFO,
 			            "Wayback <https://wayback.freedesktop.org/> X.Org compatibility layer");
 			wayback_log(LOG_INFO, "Version %s", WAYBACK_VERSION);

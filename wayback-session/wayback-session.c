@@ -61,7 +61,6 @@ int main(int argc, char *argv[])
 	char **session_cmd = NULL;
 	char *xinitrc_path = NULL;
 	const struct optcmd opts[] = {
-		{ .name = "-help", .description = "show help page", .flag = OPT_NOFLAG, .ignore = false },
 		{ .name = "-sesscmd",
 		  .description = "run custom session command",
 		  .flag = OPT_NOFLAG,
@@ -79,26 +78,7 @@ int main(int argc, char *argv[])
 
 	int cur_opt = 0;
 	while (cur_opt = optparse(argc, argv, opts, ARRAY_SIZE(opts)), cur_opt != -1) {
-		/* help message */
-		if (strcmp(argv[cur_opt], "-help") == 0) {
-			wayback_log(LOG_INFO,
-			            "Wayback <https://wayback.freedesktop.org/> X.Org compatibility layer");
-			wayback_log(
-				LOG_INFO,
-				"Report bugs to <https://gitlab.freedesktop.org/wayback/wayback/-/issues>.");
-			wayback_log(LOG_INFO, "Usage: %s [option]", argv[0]);
-			for (size_t j = 0; j < ARRAY_SIZE(opts); j++) {
-				if (!opts[j].ignore) {
-					wayback_log(LOG_INFO,
-					            "\t%s%s\t\t %s",
-					            opts[j].name,
-					            opts[j].flag == OPT_OPERAND ? " opt" : "",
-					            opts[j].description);
-				}
-			}
-			exit(EXIT_SUCCESS);
-		} else if (strcmp(argv[cur_opt], "-version") == 0 ||
-		           strcmp(argv[cur_opt], "-showconfig") == 0) {
+		if (strcmp(argv[cur_opt], "-version") == 0 || strcmp(argv[cur_opt], "-showconfig") == 0) {
 			wayback_log(LOG_INFO,
 			            "Wayback <https://wayback.freedesktop.org/> X.Org compatibility layer");
 			wayback_log(LOG_INFO, "Version %s", WAYBACK_VERSION);
