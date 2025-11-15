@@ -227,65 +227,64 @@ int main(int argc, char *argv[])
 	struct xwayback *xwayback = malloc(sizeof(struct xwayback));
 	const struct optcmd opts[] = {
 		/* options handled by Xwayback */
-		{ .name = "-help", .description = "show help page", .req_operand = false, .ignore = false },
+		{ .name = "-help", .description = "show help page", .flag = OPT_NOFLAG, .ignore = false },
 		{ .name = "-showconfig",
 		  .description = "alias to -version",
-		  .req_operand = false,
+		  .flag = OPT_NOFLAG,
 		  .ignore = false },
 		{ .name = "-version",
 		  .description = "show Xwayback version",
-		  .req_operand = false,
+		  .flag = OPT_NOFLAG,
 		  .ignore = false },
 
 		/* ignored options */
-		IGNORE_OPT("-decorate", false),
-		IGNORE_OPT("-enable‐ei‐portal", false),
-		IGNORE_OPT("-fullscreen", false),
-		IGNORE_OPT("-geometry", true),
-		IGNORE_OPT("-glamor", true),
-		IGNORE_OPT("-hidpi", false),
-		IGNORE_OPT("-host‐grab", false),
-		IGNORE_OPT("-noTouchPointerEmulation", false),
-		IGNORE_OPT("-force‐xrandr‐emulation", false),
-		IGNORE_OPT("-nokeymap", false),
-		IGNORE_OPT("-rootless", false),
-		IGNORE_OPT("-shm", false),
-		IGNORE_OPT("-wm", true),
+		IGNORE_OPT("-decorate", OPT_NOFLAG),
+		IGNORE_OPT("-enable‐ei‐portal", OPT_NOFLAG),
+		IGNORE_OPT("-fullscreen", OPT_NOFLAG),
+		IGNORE_OPT("-geometry", OPT_OPERAND),
+		IGNORE_OPT("-glamor", OPT_OPERAND),
+		IGNORE_OPT("-hidpi", OPT_NOFLAG),
+		IGNORE_OPT("-host‐grab", OPT_NOFLAG),
+		IGNORE_OPT("-noTouchPointerEmulation", OPT_NOFLAG),
+		IGNORE_OPT("-force‐xrandr‐emulation", OPT_NOFLAG),
+		IGNORE_OPT("-nokeymap", OPT_NOFLAG),
+		IGNORE_OPT("-rootless", OPT_NOFLAG),
+		IGNORE_OPT("-shm", OPT_NOFLAG),
+		IGNORE_OPT("-wm", OPT_OPERAND),
 
 		/* Xorg(1)-specific options */
-		IGNORE_OPT("-allowMouseOpenFail", false),
-		IGNORE_OPT("-allowNonLocalXvidtune", false),
-		IGNORE_OPT("-bgamma", true),
-		IGNORE_OPT("-bpp", true), /* no longer supported by upstream Xorg(1) */
-		IGNORE_OPT("-config", true),
-		IGNORE_OPT("-configdir", true),
-		IGNORE_OPT("-configure", true),
-		IGNORE_OPT("-crt", true),
-		IGNORE_OPT("-depth", true),
-		IGNORE_OPT("-disableVidMode", false),
-		IGNORE_OPT("-fbbbp", true),
-		IGNORE_OPT("-gamma", true),
-		IGNORE_OPT("-ggamma", true),
-		IGNORE_OPT("-ignoreABI", false),
-		IGNORE_OPT("-isolateDevice", true),
-		IGNORE_OPT("-keeptty", false),
-		IGNORE_OPT("-keyboard", true),
-		IGNORE_OPT("-layout", true),
-		IGNORE_OPT("-logverbose", true),
-		IGNORE_OPT("-modulepath", true),
-		IGNORE_OPT("-noautoBindCPU", false),
-		IGNORE_OPT("-nosilk", false),
-		IGNORE_OPT("-novtswitch", false),
-		IGNORE_OPT("-pointer", true),
-		IGNORE_OPT("-quiet", false),
-		IGNORE_OPT("-rgamma", true),
-		IGNORE_OPT("-sharevts", false),
-		IGNORE_OPT("-screen", true),
-		IGNORE_OPT("-showDefaultModulePath", false),
-		IGNORE_OPT("-showDefaultLibPath", false),
-		IGNORE_OPT("-showopts", false),
-		IGNORE_OPT("-weight", true),
-		IGNORE_OPT("-verbose", true),
+		IGNORE_OPT("-allowMouseOpenFail", OPT_NOFLAG),
+		IGNORE_OPT("-allowNonLocalXvidtune", OPT_NOFLAG),
+		IGNORE_OPT("-bgamma", OPT_OPERAND),
+		IGNORE_OPT("-bpp", OPT_OPERAND), /* no longer supported by upstream Xorg(1) */
+		IGNORE_OPT("-config", OPT_OPERAND),
+		IGNORE_OPT("-configdir", OPT_OPERAND),
+		IGNORE_OPT("-configure", OPT_OPERAND),
+		IGNORE_OPT("-crt", OPT_OPERAND),
+		IGNORE_OPT("-depth", OPT_OPERAND),
+		IGNORE_OPT("-disableVidMode", OPT_NOFLAG),
+		IGNORE_OPT("-fbbbp", OPT_OPERAND),
+		IGNORE_OPT("-gamma", OPT_OPERAND),
+		IGNORE_OPT("-ggamma", OPT_OPERAND),
+		IGNORE_OPT("-ignoreABI", OPT_NOFLAG),
+		IGNORE_OPT("-isolateDevice", OPT_OPERAND),
+		IGNORE_OPT("-keeptty", OPT_NOFLAG),
+		IGNORE_OPT("-keyboard", OPT_OPERAND),
+		IGNORE_OPT("-layout", OPT_OPERAND),
+		IGNORE_OPT("-logverbose", OPT_OPERAND),
+		IGNORE_OPT("-modulepath", OPT_OPERAND),
+		IGNORE_OPT("-noautoBindCPU", OPT_NOFLAG),
+		IGNORE_OPT("-nosilk", OPT_NOFLAG),
+		IGNORE_OPT("-pointer", OPT_OPERAND),
+		IGNORE_OPT("-quiet", OPT_NOFLAG),
+		IGNORE_OPT("-rgamma", OPT_OPERAND),
+		IGNORE_OPT("-sharevts", OPT_NOFLAG),
+		IGNORE_OPT("-screen", OPT_OPERAND),
+		IGNORE_OPT("-showDefaultModulePath", OPT_NOFLAG),
+		IGNORE_OPT("-showDefaultLibPath", OPT_NOFLAG),
+		IGNORE_OPT("-showopts", OPT_NOFLAG),
+		IGNORE_OPT("-weight", OPT_OPERAND),
+		IGNORE_OPT("-verbose", OPT_OPERAND),
 	};
 	int socket_xwayback[2];
 	int socket_xwayland[2];
@@ -309,7 +308,7 @@ int main(int argc, char *argv[])
 					wayback_log(LOG_INFO,
 					            "\t%s%s\t\t %s",
 					            opts[j].name,
-					            opts[j].req_operand ? " opt" : "",
+					            opts[j].flag == OPT_OPERAND ? " opt" : "",
 					            opts[j].description);
 				}
 			}
@@ -442,7 +441,7 @@ int main(int argc, char *argv[])
 		size_t j = 0;
 		for (; j < ARRAY_SIZE(opts); j++) {
 			if (strcmp(opts[j].name, argv[i]) == 0) {
-				if (opts[j].req_operand && (i + 1) < argc) {
+				if (opts[j].flag == OPT_OPERAND && (i + 1) < argc) {
 					i++;
 				}
 				break;

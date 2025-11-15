@@ -61,18 +61,18 @@ int main(int argc, char *argv[])
 	char **session_cmd = NULL;
 	char *xinitrc_path = NULL;
 	const struct optcmd opts[] = {
-		{ .name = "-help", .description = "show help page", .req_operand = false, .ignore = false },
+		{ .name = "-help", .description = "show help page", .flag = OPT_NOFLAG, .ignore = false },
 		{ .name = "-sesscmd",
 		  .description = "run custom session command",
-		  .req_operand = true,
+		  .flag = OPT_NOFLAG,
 		  .ignore = false },
 		{ .name = "-showconfig",
 		  .description = "alias to -version",
-		  .req_operand = false,
+		  .flag = OPT_NOFLAG,
 		  .ignore = false },
 		{ .name = "-version",
 		  .description = "show wayback-session version",
-		  .req_operand = false,
+		  .flag = OPT_NOFLAG,
 		  .ignore = false },
 	};
 	signal(SIGCHLD, handle_child_exit);
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 					wayback_log(LOG_INFO,
 					            "\t%s%s\t\t %s",
 					            opts[j].name,
-					            opts[j].req_operand ? " opt" : "",
+					            opts[j].flag == OPT_OPERAND ? " opt" : "",
 					            opts[j].description);
 				}
 			}

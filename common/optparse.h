@@ -13,16 +13,22 @@
 #include <string.h>
 #include <unistd.h>
 
+enum optparse_flags
+{
+	OPT_OPERAND, /* option requires an operand, e.g. -opt thing */
+	OPT_NUM,     /* option requires a max. 2 digit operand, e.g. vtXX */
+	OPT_NOFLAG,  /* no operands at all, e.g. -opt */
+};
+
 struct optcmd
 {
 	const char *name;
 	const char *description;
-	const bool req_operand;
+	const enum optparse_flags flag;
 	const bool ignore;
 };
 
-#define IGNORE_OPT(s, req_op)                                                                      \
-	{ .name = s, .description = "", .req_operand = req_op, .ignore = true }
+#define IGNORE_OPT(s, f) { .name = s, .description = "", .flag = f, .ignore = true }
 
 int optparse(int argc, char *argv[], const struct optcmd opts[], uint32_t optlen);
 
