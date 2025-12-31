@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 	const struct optcmd opts[] = {
 		{ .name = "-sesscmd",
 		  .description = "run custom session command",
-		  .flag = OPT_NOFLAG,
+		  .flag = OPT_OPERAND,
 		  .ignore = false },
 		{ .name = "-showconfig",
 		  .description = "alias to -version",
