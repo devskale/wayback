@@ -45,6 +45,7 @@ fedora:
       paths:
         - dnf-cache/
     script: |
+          dnf --setopt=cachedir=`pwd`/dnf-cache --assumeyes --nogpgcheck upgrade fedora-repos fedora-gpg-keys
           dnf --setopt=cachedir=`pwd`/dnf-cache --assumeyes install \
             meson \
             gcc \
