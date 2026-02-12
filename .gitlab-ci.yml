@@ -37,28 +37,6 @@ alpine:
         - branches
         - merge_requests
 
-arch:
-    image: ghcr.io/archlinux/archlinux:base-devel
-    stage: build
-    cache:
-      key: pacman-cache
-      paths:
-        - pacman-cache/
-    script: |
-          pacman --cachedir=`pwd`/pacman-cache -Syu --needed --noconfirm \
-            libxkbcommon \
-            meson \
-            wayland \
-            wayland-protocols \
-            wlroots0.19 \
-            xorg-xwayland \
-            scdoc
-          meson setup --fatal-meson-warnings builddir/ -Dgenerate_manpages=enabled
-          meson compile -C builddir/ -v
-    only:
-        - branches
-        - merge_requests
-
 fedora:
     image: quay.io/fedora/fedora:rawhide
     stage: build
