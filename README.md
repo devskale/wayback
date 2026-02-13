@@ -49,6 +49,7 @@ are still applicable to the latest code.***
 - Alpine Linux: [`wayback`][alpine-pkg] (in `community` repo)
 - ALT Linux: [`wayback`][alt-pkg]
 - Arch Linux: [`wayback-x11-git`][aur-pkg] in the AUR
+- Debian: [`wayback`][debian-pkg]
 - Fedora Linux: [`wayback`][fedora-pkg]
 - Gentoo GURU: [`gui-wm/wayback`][gentoo-guru]
 - Nixpkgs: [`wayback-x11`][nixpkgs-pkg]
@@ -59,6 +60,7 @@ are still applicable to the latest code.***
 [alpine-pkg]: https://gitlab.alpinelinux.org/alpine/aports/-/blob/master/community/wayback
 [alt-pkg]: https://packages.altlinux.org/en/sisyphus/srpms/wayback/
 [aur-pkg]: https://aur.archlinux.org/packages/wayback-x11-git
+[debian-pkg]: https://packages.debian.org/experimental/wayback
 [fedora-pkg]: https://src.fedoraproject.org/rpms/wayback
 [gentoo-guru]: https://wiki.gentoo.org/wiki/Project:GURU/Information_for_End_Users
 [nixpkgs-pkg]: https://search.nixos.org/packages?channel=unstable&show=wayback-x11
