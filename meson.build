@@ -26,9 +26,6 @@ xwayland       = dependency('xwayland', version: '>=24.1')
 wlroots = dependency('wlroots-0.20', version: '>=0.20', required: false)
 if not wlroots.found()
   wlroots = dependency('wlroots-0.19', version: '>=0.19', required: false)
-  if not wlroots.found()
-    wlroots = dependency('wlroots-0.18', version: '>=0.18')
-  endif
 endif
 
 xwayland_executable_path = xwayland.get_variable(pkgconfig: 'xwayland')
