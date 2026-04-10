@@ -17,6 +17,13 @@
 
 int optind = 0, optpos = 0, optoper = 0;
 
+bool optmatch(const char *arg, const struct optcmd *opt)
+{
+	if (opt->flag == OPT_NUM)
+		return strncmp(arg, opt->name, strlen(opt->name)) == 0;
+	return strcmp(opt->name, arg) == 0;
+}
+
 int optparse(int argc, char *argv[], const struct optcmd opts[], uint32_t optlen)
 {
 	optpos++;
@@ -45,12 +52,14 @@ int optparse(int argc, char *argv[], const struct optcmd opts[], uint32_t optlen
 				}
 			}
 			exit(EXIT_SUCCESS);
-		} else if (strcmp(argv[optpos], opts[i].name) == 0) {
-			if (((opts[i].flag == OPT_OPERAND) && (((optpos + 1) >= argc || !argv[optpos + 1]))) ||
-			    opts[i].flag == OPT_NUM) {
+		} else if (optmatch(argv[optpos], &opts[i])) {
+			if ((opts[i].flag == OPT_OPERAND && ((optpos + 1) >= argc || !argv[optpos + 1])) ||
+			    (opts[i].flag == OPT_NUM && strlen(argv[optpos]) == strlen(opts[i].name))) {
 				wayback_log(LOG_ERROR, "Option %s requires operand", argv[optpos]);
 				exit(EXIT_FAILURE);
-			} else if (opts[i].ignore == true) {
+			}
+
+			if (opts[i].ignore == true) {
 				if (strcmp(opts[i].description, "") != 0)
 					wayback_log(LOG_WARN, "%s: %s", argv[optpos], opts[i].description);
 				else
@@ -60,16 +69,6 @@ int optparse(int argc, char *argv[], const struct optcmd opts[], uint32_t optlen
 			if (opts[i].flag == OPT_OPERAND) {
 				optind++;
 				optoper++;
-			}
-			optind++;
-			break;
-		} else if (opts[i].flag == OPT_NUM &&
-		           strncmp(argv[optpos], opts[i].name, strlen(opts[i].name)) == 0) {
-			if (opts[i].ignore == true) {
-				if (strcmp(opts[i].description, "") != 0)
-					wayback_log(LOG_WARN, "%s: %s", argv[optpos], opts[i].description);
-				else
-					wayback_log(LOG_WARN, "Option %s ignored", argv[optpos]);
 			}
 			optind++;
 			break;
