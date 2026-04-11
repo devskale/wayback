@@ -31,6 +31,7 @@ struct optcmd
 #define IGNORE_OPT_DESC(s, f, d) { .name = s, .description = d, .flag = f, .ignore = true }
 #define IGNORE_OPT(s, f) IGNORE_OPT_DESC(s, f, "")
 
+bool optmatch(const char *arg, const struct optcmd *opt);
 int optparse(int argc, char *argv[], const struct optcmd opts[], uint32_t optlen);
 
 #endif

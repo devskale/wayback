@@ -461,7 +461,7 @@ int main(int argc, char *argv[])
 	for (int i = 1; i < argc; i++) {
 		size_t j = 0;
 		for (; j < ARRAY_SIZE(opts); j++) {
-			if (strcmp(opts[j].name, argv[i]) == 0) {
+			if (optmatch(argv[i], &opts[j])) {
 				if (opts[j].flag == OPT_OPERAND && (i + 1) < argc) {
 					i++;
 				}
