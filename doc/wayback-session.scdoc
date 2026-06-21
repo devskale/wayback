@@ -11,7 +11,7 @@ wayback-session - session launcher for *Xwayback*(1)
 # DESCRIPTION
 
 *wayback-session* is a session launcher using *Xwayback*(1).
-Its behaviour is similiar to that of *startx*(1), and the same xinitrc files are used.
+Its behaviour is similar to that of *startx*(1), and the same xinitrc files are used.
 
 # OPTIONS
 
